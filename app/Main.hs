@@ -21,7 +21,6 @@ gameLoop player = do
                 putStrLn $ "\n" ++ (show player)
                 gameLoop player
         'q' ->  putStrLn "\nBye!"
-        -- otherwise -> putStrLn "Wot"
 
 help =
     "h - help\n" ++
