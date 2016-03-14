@@ -1,28 +1,28 @@
 module Main where
 
-import Player
-import System.IO
+import Graphics.UI.GLUT
+import Graphics.Rendering.OpenGL
 
 main :: IO ()
 main = do
-    putStrLn "Welcome to zero!"
-    putStrLn help
-    gameLoop $ Player "Piotr" 30
+    getArgsAndInitialize
+    createAWindow "zero"
+    mainLoop
 
-gameLoop :: Player -> IO ()
-gameLoop player = do
-    hSetBuffering stdin NoBuffering
-    input <- getChar
-    case input of
-        'h' ->  do
-                putStrLn $ "\n" ++ help
-                gameLoop player
-        'n' ->  do
-                putStrLn $ "\n" ++ (show player)
-                gameLoop player
-        'q' ->  putStrLn "\nBye!"
+createAWindow :: String -> IO ()
+createAWindow windowName = do
+    createWindow windowName
+    displayCallback $= displayPoints
 
-help =
-    "h - help\n" ++
-    "n - new game\n" ++
-    "q - quit"
+displayPoints :: IO ()
+displayPoints = do
+    clear [ColorBuffer]
+    renderPrimitive
+        Polygon
+        $mapM_ (\(x, y, z) -> vertex $ Vertex3 x y z) myPoints
+
+myPoints :: [(GLfloat, GLfloat, GLfloat)]
+myPoints =
+    [(0.75, -0.75, 0.0)
+    ,(0.0, 0.75, 0.0)
+    ,(-0.75, -0.75, 0.0)]
