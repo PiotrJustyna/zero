@@ -18,11 +18,11 @@ displayPoints :: IO ()
 displayPoints = do
     clear [ColorBuffer]
     renderPrimitive
-        Polygon
-        $mapM_ (\(x, y, z) -> vertex $ Vertex3 x y z) myPoints
+        Triangles
+        $mapM_ (\(x, y, z) -> vertex $ Vertex3 x y z) (foldl (\acc x -> (myPoints x) ++ acc) [(0.0, 0.0, 0.0)] startingPoints)
 
-myPoints :: [(GLfloat, GLfloat, GLfloat)]
-myPoints =
-    [(0.75, -0.75, 0.0)
-    ,(0.0, 0.75, 0.0)
-    ,(-0.75, -0.75, 0.0)]
+startingPoints :: [(Float, Float)]
+startingPoints = [(x, y) | x <- [-0.95, -0.9 .. 0.9], y <- [-0.95, -0.9 .. 0.9]]
+
+myPoints :: (Float, Float) -> [(GLfloat, GLfloat, GLfloat)]
+myPoints coordinates = [((fst coordinates) + 0.0075, (snd coordinates) - 0.0075, 0.0), ((fst coordinates) + 0.0, (snd coordinates) + 0.0075, 0.0) ,((fst coordinates) - 0.0075, (snd coordinates) - 0.0075, 0.0)]
