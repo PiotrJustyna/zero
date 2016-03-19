@@ -7,7 +7,7 @@ cache:
 matrix:
     include:
         - env: CABALVER=1.22 GHCVER=7.10.3
-          addons: {apt: {packages: [cabal-install-1.22, ghc-7.10.3, freeglut3-dev], sources: [hvr-ghc]}}
+          addons: {apt: {packages: [cabal-install-1.22, ghc-7.10.3, freeglut3-dev, libXxf86vm-dev], sources: [hvr-ghc]}}
 
 before_install:
     - mkdir -p ~/.local/bin
