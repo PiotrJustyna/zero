@@ -9,20 +9,25 @@ import Control.Monad (unless)
 defaultZeroContextFactory :: ContextFactory c ds GLFW.GLFWWindow
 defaultZeroContextFactory = GLFW.newContext' [] (GLFW.WindowConf 800 600 "zero")
 
-projectPlayerLocation :: PlayerLocation -> [(V4 Float, V3 Float)]
-projectPlayerLocation (V3 playerLocationX playerLocationY playerLocationZ) =
-    [((V4 (playerLocationX + 0.04) (playerLocationY - 0.04) playerLocationZ 1), V3 0 1 0),
-    ((V4 (playerLocationX + 0.0) (playerLocationY + 0.04) playerLocationZ 1), V3 0 1 0),
-    ((V4 (playerLocationX - 0.04) (playerLocationY - 0.04) playerLocationZ 1), V3 0 1 0)]
+projectPlayer :: Player -> [(V4 Float, V3 Float)]
+projectPlayer (Player playerName playerHitPoints (V3 x y z)) =
+    [((V4 (x + 0.05) (y - 0.05) z 1), V3 redChannel greenChannel 0),
+    ((V4 (x + 0.0) (y + 0.05) z 1), V3 redChannel greenChannel 0),
+    ((V4 (x - 0.05) (y - 0.05) z 1), V3 redChannel greenChannel 0)]
+    where
+    greenChannel = (fromIntegral playerHitPoints) / 100.0 :: Float
+    redChannel = (1.0 :: Float) - (fromIntegral playerHitPoints) / 100.0 :: Float
 
-players =   [Player "a" 100 (V3 (-0.5) 0 0),
-            Player "b" 100 (V3 0 0 0),
-            Player "c" 100 (V3 0.5 0 0)]
+players =   [Player "a" 0 (V3 (-0.5) 0 0),
+            Player "b" 20 (V3 0 0 0),
+            Player "c" 40 (V3 0.5 0 0),
+            Player "d" 60 (V3 (-0.25) 0.25 0),
+            Player "e" 80 (V3 0.25 0.25 0)]
 
 main =
     runContextT defaultZeroContextFactory (ContextFormatColor RGB8) $ do
         vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (3 * (length players))
-        writeBuffer vertexBuffer 0 (foldl (\acc x -> (projectPlayerLocation (getLocation x)) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
+        writeBuffer vertexBuffer 0 (foldl (\acc x -> (projectPlayer x) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
 
         shader <- compileShader $ do
             primitiveStream <- toPrimitiveStream id

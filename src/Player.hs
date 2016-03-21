@@ -3,7 +3,6 @@ module Player
     PlayerName,
     PlayerHitPoints,
     PlayerLocation,
-    getLocation,
     hit,
     heal) where
 
@@ -17,13 +16,10 @@ type PlayerLocation = V3 Float
 data Player = Player PlayerName PlayerHitPoints PlayerLocation
 
 instance Show Player where
-    show (Player playerName playerHitPoints playerLocation) =
+    show (Player playerName playerHitPoints (V3 x y z)) =
         "Player: " ++ playerName ++
         "\nHit points: " ++ show playerHitPoints ++
-        "\nLocation: " ++ show playerLocation
-
-getLocation :: Player -> PlayerLocation
-getLocation (Player playerName playerHitPoints playerLocation) = playerLocation
+        "\nLocation: x=" ++ show x ++ ", y=" ++ show y ++ ", z=" ++ show z
 
 hit :: Player -> Player
 hit (Player a b c) = Player a (b - 1) c
