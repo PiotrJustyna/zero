@@ -9,8 +9,8 @@ matrix:
 before_install:
     - mkdir -p ~/.local/bin
     - export PATH=$HOME/.local/bin:$PATH
-    - apt-get update -qq
-    - apt-get install cabal-install-1.22 ghc-7.10.3 freeglut3-dev libXxf86vm-dev
+    - sudo apt-get update -qq
+    - sudo apt-get install cabal-install-1.22 ghc-7.10.3 freeglut3-dev libXxf86vm-dev
     - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
 
 install:
