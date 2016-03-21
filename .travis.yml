@@ -1,5 +1,3 @@
-sudo: false
-
 cache:
   directories:
   - $HOME/.stack
@@ -7,11 +5,12 @@ cache:
 matrix:
     include:
         - env: CABALVER=1.22 GHCVER=7.10.3
-          addons: {apt: {packages: [cabal-install-1.22, ghc-7.10.3, freeglut3-dev, libXxf86vm-dev], sources: [hvr-ghc]}}
 
 before_install:
     - mkdir -p ~/.local/bin
     - export PATH=$HOME/.local/bin:$PATH
+    - apt-get update -qq
+    - apt-get install cabal-install-1.22 ghc-7.10.3 freeglut3-dev libXxf86vm-dev
     - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
 
 install:
