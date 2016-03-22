@@ -5,6 +5,7 @@ import Player
 import Graphics.GPipe
 import qualified "GPipe-GLFW" Graphics.GPipe.Context.GLFW as GLFW
 import Control.Monad (unless)
+import Control.Arrow (first)
 
 defaultZeroContextFactory :: ContextFactory c ds GLFW.GLFWWindow
 defaultZeroContextFactory = GLFW.newContext' [] (GLFW.WindowConf 800 600 "zero")
@@ -31,7 +32,14 @@ main =
 
         shader <- compileShader $ do
             primitiveStream <- toPrimitiveStream id
-            fragmentStream <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) primitiveStream
+            let rotationMatrix a =  V4 (V4 (cos a) (-sin a) 0 0)
+                                    (V4 (sin a) (cos a) 0 0)
+                                    (V4 0    0    1 0)
+                                    (V4 0    0    0 1)
+            let primitiveStream2 = fmap (first (rotationMatrix (-0.2) !*)) primitiveStream
+            let primitiveStream3 = fmap (\(pos,clr) -> (pos - V4 0.3 0.3 0 0, clr / 2)) primitiveStream
+            let primitiveStream4 = primitiveStream2 `mappend` primitiveStream3
+            fragmentStream <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) primitiveStream4
             drawContextColor (const (ContextColorOption NoBlending (V3 True True True))) fragmentStream
 
         loop vertexBuffer shader
