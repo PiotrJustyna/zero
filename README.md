@@ -4,6 +4,4 @@
 
 A silly little game project.
 
-Current version starts playing nicely with GPipe (followed [this tutorial](http://tobbebex.blogspot.ie/2015/09/gpu-programming-in-haskell-using-gpipe.html)) producing this stunning result:
-
-![rendering](/images/1.png)
+![rendering](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/Screenshot%20from%202016-03-20%2021-54-47.png)
