@@ -1,4 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables, PackageImports, TypeFamilies #-}
+{-# LANGUAGE ScopedTypeVariables, PackageImports, FlexibleContexts, TypeFamilies #-}
 module Main where
 
 import Player
@@ -30,21 +30,25 @@ main =
         vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (3 * (length players))
         writeBuffer vertexBuffer 0 (foldl (\acc x -> (projectPlayer x) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
 
+        uniformBuffer :: Buffer os (Uniform (B Float)) <- newBuffer 1
+
         shader <- compileShader $ do
             primitiveStream <- toPrimitiveStream id
             let rotationMatrix a =  V4 (V4 (cos a) (-sin a) 0 0)
                                     (V4 (sin a) (cos a) 0 0)
                                     (V4 0    0    1 0)
                                     (V4 0    0    0 1)
-            let primitiveStream2 = fmap (first (rotationMatrix (-0.2) !*)) primitiveStream
-            let primitiveStream3 = fmap (\(pos,clr) -> (pos - V4 0.3 0.3 0 0, clr / 2)) primitiveStream
-            let primitiveStream4 = primitiveStream2 `mappend` primitiveStream3
+            uniform <- getUniform (const (uniformBuffer,0))
+            let primitiveStream2 = fmap (first (rotationMatrix uniform !*)) primitiveStream
+            let primitiveStream3 = fmap (\(pos,clr) -> (pos - V4 0.3 0.3 0 0, clr / 2)) primitiveStream2
+            let primitiveStream4 = primitiveStream `mappend` primitiveStream3
             fragmentStream <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) primitiveStream4
             drawContextColor (const (ContextColorOption NoBlending (V3 True True True))) fragmentStream
 
-        loop vertexBuffer shader
+        loop vertexBuffer shader uniformBuffer 0.0
 
-loop vertexBuffer shader = do
+loop vertexBuffer shader uniformBuffer angle = do
+    writeBuffer uniformBuffer 0 [angle]
     render $ do
         clearContextColor (V3 0.2 0.2 0.2)
         vertexArray <- newVertexArray vertexBuffer
@@ -53,4 +57,4 @@ loop vertexBuffer shader = do
     swapContextBuffers
 
     closeRequested <- GLFW.windowShouldClose
-    unless closeRequested $ loop vertexBuffer shader
+    unless closeRequested $ loop vertexBuffer shader uniformBuffer ((angle+0.1) `mod''` (2*pi))
