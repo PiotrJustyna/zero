@@ -19,6 +19,7 @@ projectPlayer (Player playerName playerHitPoints (V3 x y z)) =
     greenChannel = (fromIntegral playerHitPoints) / 100.0 :: Float
     redChannel = (1.0 :: Float) - (fromIntegral playerHitPoints) / 100.0 :: Float
 
+players :: [Player]
 players =   [Player "a" 0 (V3 (-0.5) 0 0),
             Player "b" 20 (V3 0 0 0),
             Player "c" 40 (V3 0.5 0 0),
@@ -51,7 +52,19 @@ loop vertexBuffer shader uniformBuffer angle = do
     writeBuffer uniformBuffer 0 [angle]
     render $ do
         clearContextColor (V3 0.2 0.2 0.2)
-        vertexArray <- newVertexArray vertexBuffer
+        -- This is quite bizarre to me:
+        -- vertexArray :: VertexArray () (B4 Float, B3 Float)
+        -- According to the 'data VertexArray t a' documentation:
+        -- A vertex array is the basic building block for a primitive array.
+        -- It is created from the contents of a Buffer, but unlike a Buffer,
+        -- it may be truncated, zipped with other vertex arrays,
+        -- and even morphed into arrays of a different type with the provided Functor instance.
+        -- A VertexArray t a has elements of type a, and
+        -- t indicates whether the vertex array may be used as instances or not.
+        -- The last line is what's puzzling at the moment: compiler insisted I make 't' a '()' unit -
+        -- I believe it means the vertexArray cannot (will not?) be used as instances (an instance?).
+        -- The type is explicitly declared, but not sure if this is correct.
+        vertexArray :: VertexArray () (B4 Float, B3 Float) <- newVertexArray vertexBuffer
         let primitiveArray = toPrimitiveArray TriangleList vertexArray
         shader primitiveArray
     swapContextBuffers
