@@ -3,7 +3,7 @@
 
 # What is zero?
 
-Zero is a silly little realtime rendering/game project I'm working on in my spare time. It is an exercise in using:
+Zero is a silly little realtime rendering project I'm working on in my spare time. It is an exercise in using:
 
 * Haskell
 * OpenGL (GPipe to be more specific)
