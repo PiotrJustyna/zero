@@ -85,5 +85,10 @@ loop vertexBuffer shader uniformBuffer angle = do
         shader primitiveArray
     swapContextBuffers
 
+    rightKeyState :: GLFW.KeyState <- GLFW.getKey GLFW.Key'Right
+    leftKeyState :: GLFW.KeyState <- GLFW.getKey GLFW.Key'Left
     closeRequested :: Bool <- GLFW.windowShouldClose
-    unless closeRequested $ loop vertexBuffer shader uniformBuffer ((angle+0.01) `mod''` (2*pi))
+    let spinDirection = if (rightKeyState == GLFW.KeyState'Pressed && leftKeyState == GLFW.KeyState'Released) then (-0.01)
+        else if (rightKeyState == GLFW.KeyState'Released && leftKeyState == GLFW.KeyState'Pressed) then 0.01
+        else 0
+    unless closeRequested $ loop vertexBuffer shader uniformBuffer ((angle + spinDirection) `mod''` (2*pi))
