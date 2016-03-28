@@ -26,47 +26,36 @@ players = [Player "a" 0 (V3 (-0.5) 0 0),
             Player "d" 60 (V3 (-0.25) 0.25 0),
             Player "e" 80 (V3 0.25 0.25 0)]
 
-rotationXMatrix :: S V Float -> V4 (V4 VFloat)
-rotationXMatrix a = V4 row1 row2 row3 row4
+rotationMatrix :: S V Float -> S V Float -> S V Float -> V4 (V4 VFloat)
+rotationMatrix a b g = V4 row1 row2 row3 row4
     where
-        row1 = V4 1 0 0 0
-        row2 = V4 0 (cos a) (-sin a) 0
-        row3 = V4 0 (sin a) (cos a) 0
-        row4 = V4 0 0 0 1
+        row1 = V4 ((cos b) * (cos g))   (((cos g) * (sin a) * (sin b)) - ((cos a) * (sin g)))   (((cos a) * (cos g) * (sin b)) + ((sin a) * (sin g)))   0
+        row2 = V4 ((cos b) * (sin g))   (((cos a) * (cos g)) + ((sin a) * (sin b) * (sin g)))   (((cos a) * (sin b) * (sin g)) - ((cos g) * (sin a)))   0
+        row3 = V4 ((-1.0) * (sin b))    ((cos b) * (sin a))                                     ((cos a) * (cos b))                                     0
+        row4 = V4 0                     0                                                       0                                                       1
 
-rotationYMatrix :: S V Float -> V4 (V4 VFloat)
-rotationYMatrix a = V4 row1 row2 row3 row4
+translationMatrix :: S V Float -> S V Float -> S V Float -> V4 (V4 VFloat)
+translationMatrix x y z = V4 row1 row2 row3 row4
     where
-        row1 = V4 (cos a) 0 (sin a) 0
-        row2 = V4 0 1 0 0
-        row3 = V4 (-sin a) 0 (cos a) 0
-        row4 = V4 0 0 0 1
-
-rotationZMatrix :: S V Float -> V4 (V4 VFloat)
-rotationZMatrix a = V4 row1 row2 row3 row4
-    where
-        row1 = V4 (cos a) (-sin a) 0 0
-        row2 = V4 (sin a) (cos a) 0 0
-        row3 = V4 0 0 1 0
-        row4 = V4 0 0 0 1
-
-transltionMatrix :: S V Float -> V4 (V4 VFloat)
-transltionMatrix x = V4 row1 row2 row3 row4
-    where
-        row1 = V4 1 0 0 (0.1 * x)
-        row2 = V4 0 1 0 0
-        row3 = V4 0 0 1 0
+        row1 = V4 1 0 0 x
+        row2 = V4 0 1 0 y
+        row3 = V4 0 0 1 z
         row4 = V4 0 0 0 1
 
 main =
     runContextT defaultZeroContextFactory (ContextFormatColor RGB8) $ do
         vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (3 * (length players))
-        uniformBuffer :: Buffer os (Uniform (B Float)) <- newBuffer 2
+        uniformBuffer :: Buffer os (Uniform (B Float)) <- newBuffer 6
         writeBuffer vertexBuffer 0 (foldl (\acc x -> (projectPlayer x) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
         shader :: CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Triangles (B4 Float, B3 Float)) <- compileShader $ do
             initialPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) <- toPrimitiveStream id
-            uniform :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 0))
-            let rotatedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = fmap (first (rotationZMatrix uniform !*)) initialPrimitiveStream
+            rX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 0))
+            rY :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 1))
+            rZ :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 2))
+            tX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 3))
+            tY :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 4))
+            tZ :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 5))
+            let rotatedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = (first (translationMatrix tX tY tZ !*)) <$> ((first (rotationMatrix rX rY rZ !*)) <$> initialPrimitiveStream)
             fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) rotatedPrimitiveStream
             drawContextColor (const (ContextColorOption NoBlending (V3 True True True))) fragmentStream
         loop vertexBuffer shader uniformBuffer 0.0
@@ -77,7 +66,7 @@ loop :: Buffer os (B4 Float, B3 Float)
     -> Float
     -> ContextT GLFW.GLFWWindow os (ContextFormat RGBFloat ()) IO ()
 loop vertexBuffer shader uniformBuffer angle = do
-    writeBuffer uniformBuffer 0 [angle, 3 * angle]
+    writeBuffer uniformBuffer 0 [0.0, 0.0, angle, 0.0, 0.0, 0.0]
     render $ do
         clearContextColor (V3 0.2 0.2 0.2)
         vertexArray :: VertexArray () (B4 Float, B3 Float) <- newVertexArray vertexBuffer
@@ -91,4 +80,4 @@ loop vertexBuffer shader uniformBuffer angle = do
     let spinDirection = if (rightKeyState == GLFW.KeyState'Pressed && leftKeyState == GLFW.KeyState'Released) then (-0.01)
         else if (rightKeyState == GLFW.KeyState'Released && leftKeyState == GLFW.KeyState'Pressed) then 0.01
         else 0
-    unless closeRequested $ loop vertexBuffer shader uniformBuffer ((angle + spinDirection) `mod''` (2*pi))
+    unless closeRequested $ loop vertexBuffer shader uniformBuffer ((angle + spinDirection) `mod''` (2 * pi))
