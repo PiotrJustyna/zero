@@ -61,7 +61,7 @@ transltionMatrix x = V4 row1 row2 row3 row4
 main =
     runContextT defaultZeroContextFactory (ContextFormatColor RGB8) $ do
         vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (3 * (length players))
-        uniformBuffer :: Buffer os (Uniform (B Float)) <- newBuffer 1
+        uniformBuffer :: Buffer os (Uniform (B Float)) <- newBuffer 2
         writeBuffer vertexBuffer 0 (foldl (\acc x -> (projectPlayer x) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
         shader :: CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Triangles (B4 Float, B3 Float)) <- compileShader $ do
             initialPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) <- toPrimitiveStream id
@@ -77,7 +77,7 @@ loop :: Buffer os (B4 Float, B3 Float)
     -> Float
     -> ContextT GLFW.GLFWWindow os (ContextFormat RGBFloat ()) IO ()
 loop vertexBuffer shader uniformBuffer angle = do
-    writeBuffer uniformBuffer 0 [angle]
+    writeBuffer uniformBuffer 0 [angle, 3 * angle]
     render $ do
         clearContextColor (V3 0.2 0.2 0.2)
         vertexArray :: VertexArray () (B4 Float, B3 Float) <- newVertexArray vertexBuffer
