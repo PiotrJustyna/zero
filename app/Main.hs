@@ -12,9 +12,9 @@ defaultZeroContextFactory = GLFW.newContext' [] (GLFW.WindowConf 800 600 "zero")
 
 projectPlayer :: Player -> [(V4 Float, V3 Float)]
 projectPlayer (Player playerName playerHitPoints (V3 x y z)) =
-    [((V4 (x + 0.05) (y - 0.05) z 1), V3 redChannel 0 0),
-    ((V4 (x + 0.0) (y + 0.05) z 1), V3 redChannel 0 0),
-    ((V4 (x - 0.05) (y - 0.05) z 1), V3 redChannel 0 0)]
+    [(V4 (x + 0.05) (y - 0.05) z 1, V3 redChannel 0 0),
+    (V4 (x + 0.0) (y + 0.05) z 1, V3 redChannel 0 0),
+    (V4 (x - 0.05) (y - 0.05) z 1, V3 redChannel 0 0)]
     where
     greenChannel = (fromIntegral playerHitPoints) / 100.0
     redChannel = 1.0 - (fromIntegral playerHitPoints) / 100.0
@@ -84,15 +84,15 @@ loop vertexBuffer shader uniformBuffer transformations = do
     closeRequested :: Bool <- GLFW.windowShouldClose
 
     unless closeRequested $ loop vertexBuffer shader uniformBuffer
-        [(((transformations !! 0) + extractInputValue rotateXKeyState reverseKeyState) `mod''` (2 * pi)),
-        (((transformations !! 1) + extractInputValue rotateYKeyState reverseKeyState) `mod''` (2 * pi)),
-        (((transformations !! 2) + extractInputValue rotateZKeyState reverseKeyState) `mod''` (2 * pi)),
+        [((transformations !! 0) + extractInputValue rotateXKeyState reverseKeyState) `mod''` (2 * pi),
+        ((transformations !! 1) + extractInputValue rotateYKeyState reverseKeyState) `mod''` (2 * pi),
+        ((transformations !! 2) + extractInputValue rotateZKeyState reverseKeyState) `mod''` (2 * pi),
         (transformations !! 3) + extractInputValue translateXKeyState reverseKeyState,
         (transformations !! 4) + extractInputValue translateYKeyState reverseKeyState,
         (transformations !! 5) + extractInputValue translateZKeyState reverseKeyState]
 
 extractInputValue :: GLFW.KeyState -> GLFW.KeyState -> Float
 extractInputValue actionKeyState reverseKeyState =
-    if (actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released) then 0.01
-    else if (actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed) then (-0.01) else 0
+    if actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released then 0.01
+    else if actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed then (-0.01) else 0
 
