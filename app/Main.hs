@@ -83,17 +83,16 @@ loop vertexBuffer shader uniformBuffer transformations = do
     reverseKeyState :: GLFW.KeyState <- GLFW.getKey GLFW.Key'RightShift
     closeRequested :: Bool <- GLFW.windowShouldClose
 
-    let xSpinDirection = if (rotateXKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released) then 0.01 else if (rotateXKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed) then (-0.01) else 0
-    let ySpinDirection = if (rotateYKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released) then 0.01 else if (rotateYKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed) then (-0.01) else 0
-    let zSpinDirection = if (rotateZKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released) then 0.01 else if (rotateZKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed) then (-0.01) else 0
-    let xTranslationValue = if (translateXKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released) then 0.01 else if (translateXKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed) then (-0.01) else 0
-    let yTranslationValue = if (translateYKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released) then 0.01 else if (translateYKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed) then (-0.01) else 0
-    let zTranslationValue = if (translateZKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released) then 0.01 else if (translateZKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed) then (-0.01) else 0
-
     unless closeRequested $ loop vertexBuffer shader uniformBuffer
-        [(((transformations !! 0) + xSpinDirection) `mod''` (2 * pi)),
-        (((transformations !! 1) + ySpinDirection) `mod''` (2 * pi)),
-        (((transformations !! 2) + zSpinDirection) `mod''` (2 * pi)),
-        (transformations !! 3) + xTranslationValue,
-        (transformations !! 4) + yTranslationValue,
-        (transformations !! 5) + zTranslationValue]
+        [(((transformations !! 0) + extractInputValue rotateXKeyState reverseKeyState) `mod''` (2 * pi)),
+        (((transformations !! 1) + extractInputValue rotateYKeyState reverseKeyState) `mod''` (2 * pi)),
+        (((transformations !! 2) + extractInputValue rotateZKeyState reverseKeyState) `mod''` (2 * pi)),
+        (transformations !! 3) + extractInputValue translateXKeyState reverseKeyState,
+        (transformations !! 4) + extractInputValue translateYKeyState reverseKeyState,
+        (transformations !! 5) + extractInputValue translateZKeyState reverseKeyState]
+
+extractInputValue :: GLFW.KeyState -> GLFW.KeyState -> Float
+extractInputValue actionKeyState reverseKeyState =
+    if (actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released) then 0.01
+    else if (actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed) then (-0.01) else 0
+
