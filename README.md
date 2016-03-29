@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/PiotrJustyna/zero.svg?branch=master)](https://travis-ci.org/PiotrJustyna/zero)
 [![Issue Count](https://codeclimate.com/github/PiotrJustyna/zero/badges/issue_count.svg)](https://codeclimate.com/github/PiotrJustyna/zero)
+[![Code Climate](https://codeclimate.com/github/PiotrJustyna/zero/badges/gpa.svg)](https://codeclimate.com/github/PiotrJustyna/zero)
 
 # What is zero?
 
