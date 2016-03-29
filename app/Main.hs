@@ -58,15 +58,15 @@ main =
             let rotatedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = (first (translationMatrix tX tY tZ !*)) <$> ((first (rotationMatrix rX rY rZ !*)) <$> initialPrimitiveStream)
             fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) rotatedPrimitiveStream
             drawContextColor (const (ContextColorOption NoBlending (V3 True True True))) fragmentStream
-        loop vertexBuffer shader uniformBuffer 0.0
+        loop vertexBuffer shader uniformBuffer [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 loop :: Buffer os (B4 Float, B3 Float)
     -> CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Triangles (B4 Float, B3 Float))
     -> Buffer os (Uniform (B Float))
-    -> Float
+    -> [Float]
     -> ContextT GLFW.GLFWWindow os (ContextFormat RGBFloat ()) IO ()
-loop vertexBuffer shader uniformBuffer angle = do
-    writeBuffer uniformBuffer 0 [0.0, 0.0, angle, 0.0, 0.0, 0.0]
+loop vertexBuffer shader uniformBuffer transformations = do
+    writeBuffer uniformBuffer 0 transformations
     render $ do
         clearContextColor (V3 0.2 0.2 0.2)
         vertexArray :: VertexArray () (B4 Float, B3 Float) <- newVertexArray vertexBuffer
@@ -74,10 +74,26 @@ loop vertexBuffer shader uniformBuffer angle = do
         shader primitiveArray
     swapContextBuffers
 
-    rightKeyState :: GLFW.KeyState <- GLFW.getKey GLFW.Key'Right
-    leftKeyState :: GLFW.KeyState <- GLFW.getKey GLFW.Key'Left
+    rotateXKeyState :: GLFW.KeyState <- GLFW.getKey GLFW.Key'Q
+    rotateYKeyState :: GLFW.KeyState <- GLFW.getKey GLFW.Key'W
+    rotateZKeyState :: GLFW.KeyState <- GLFW.getKey GLFW.Key'E
+    translateXKeyState :: GLFW.KeyState <- GLFW.getKey GLFW.Key'A
+    translateYKeyState :: GLFW.KeyState <- GLFW.getKey GLFW.Key'S
+    translateZKeyState :: GLFW.KeyState <- GLFW.getKey GLFW.Key'D
+    reverseKeyState :: GLFW.KeyState <- GLFW.getKey GLFW.Key'RightShift
     closeRequested :: Bool <- GLFW.windowShouldClose
-    let spinDirection = if (rightKeyState == GLFW.KeyState'Pressed && leftKeyState == GLFW.KeyState'Released) then (-0.01)
-        else if (rightKeyState == GLFW.KeyState'Released && leftKeyState == GLFW.KeyState'Pressed) then 0.01
-        else 0
-    unless closeRequested $ loop vertexBuffer shader uniformBuffer ((angle + spinDirection) `mod''` (2 * pi))
+
+    let xSpinDirection = if (rotateXKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released) then 0.01 else if (rotateXKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed) then (-0.01) else 0
+    let ySpinDirection = if (rotateYKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released) then 0.01 else if (rotateYKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed) then (-0.01) else 0
+    let zSpinDirection = if (rotateZKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released) then 0.01 else if (rotateZKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed) then (-0.01) else 0
+    let xTranslationValue = if (translateXKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released) then 0.01 else if (translateXKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed) then (-0.01) else 0
+    let yTranslationValue = if (translateYKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released) then 0.01 else if (translateYKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed) then (-0.01) else 0
+    let zTranslationValue = if (translateZKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released) then 0.01 else if (translateZKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed) then (-0.01) else 0
+
+    unless closeRequested $ loop vertexBuffer shader uniformBuffer
+        [(((transformations !! 0) + xSpinDirection) `mod''` (2 * pi)),
+        (((transformations !! 1) + ySpinDirection) `mod''` (2 * pi)),
+        (((transformations !! 2) + zSpinDirection) `mod''` (2 * pi)),
+        (transformations !! 3) + xTranslationValue,
+        (transformations !! 4) + yTranslationValue,
+        (transformations !! 5) + zTranslationValue]
