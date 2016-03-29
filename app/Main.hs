@@ -16,8 +16,8 @@ projectPlayer (Player playerName playerHitPoints (V3 x y z)) =
     (V4 (x + 0.0) (y + 0.05) z 1, V3 redChannel 0 0),
     (V4 (x - 0.05) (y - 0.05) z 1, V3 redChannel 0 0)]
     where
-    greenChannel = (fromIntegral playerHitPoints) / 100.0
-    redChannel = 1.0 - (fromIntegral playerHitPoints) / 100.0
+    greenChannel = fromIntegral playerHitPoints / 100.0
+    redChannel = 1.0 - fromIntegral playerHitPoints / 100.0
 
 players :: [Player]
 players = [Player "a" 0 (V3 (-0.5) 0 0),
@@ -44,9 +44,9 @@ translationMatrix x y z = V4 row1 row2 row3 row4
 
 main =
     runContextT defaultZeroContextFactory (ContextFormatColor RGB8) $ do
-        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (3 * (length players))
+        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (3 * length players)
         uniformBuffer :: Buffer os (Uniform (B Float)) <- newBuffer 6
-        writeBuffer vertexBuffer 0 (foldl (\acc x -> (projectPlayer x) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
+        writeBuffer vertexBuffer 0 (foldl (\acc x -> projectPlayer x ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
         shader :: CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Triangles (B4 Float, B3 Float)) <- compileShader $ do
             initialPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) <- toPrimitiveStream id
             rX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 0))
@@ -55,8 +55,8 @@ main =
             tX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 3))
             tY :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 4))
             tZ :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 5))
-            let rotatedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = (first (translationMatrix tX tY tZ !*)) <$> ((first (rotationMatrix rX rY rZ !*)) <$> initialPrimitiveStream)
-            fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) rotatedPrimitiveStream
+            let transformedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = (first (translationMatrix tX tY tZ !*)) <$> ((first (rotationMatrix rX rY rZ !*)) <$> initialPrimitiveStream)
+            fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) transformedPrimitiveStream
             drawContextColor (const (ContextColorOption NoBlending (V3 True True True))) fragmentStream
         loop vertexBuffer shader uniformBuffer [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
@@ -84,7 +84,7 @@ loop vertexBuffer shader uniformBuffer transformations = do
     closeRequested :: Bool <- GLFW.windowShouldClose
 
     unless closeRequested $ loop vertexBuffer shader uniformBuffer
-        [((transformations !! 0) + extractInputValue rotateXKeyState reverseKeyState) `mod''` (2 * pi),
+        [((head transformations) + extractInputValue rotateXKeyState reverseKeyState) `mod''` (2 * pi),
         ((transformations !! 1) + extractInputValue rotateYKeyState reverseKeyState) `mod''` (2 * pi),
         ((transformations !! 2) + extractInputValue rotateZKeyState reverseKeyState) `mod''` (2 * pi),
         (transformations !! 3) + extractInputValue translateXKeyState reverseKeyState,
@@ -92,7 +92,8 @@ loop vertexBuffer shader uniformBuffer transformations = do
         (transformations !! 5) + extractInputValue translateZKeyState reverseKeyState]
 
 extractInputValue :: GLFW.KeyState -> GLFW.KeyState -> Float
-extractInputValue actionKeyState reverseKeyState =
-    if actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released then 0.01
-    else if actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed then (-0.01) else 0
+extractInputValue actionKeyState reverseKeyState
+    | actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released = 0.01
+    | actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed = -0.01
+    | otherwise = 0
 
