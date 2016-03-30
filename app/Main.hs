@@ -13,7 +13,19 @@ defaultZeroContextFactory = GLFW.newContext' [] (GLFW.WindowConf 800 600 "zero")
 projectPlayer :: Player -> [(V4 Float, V3 Float)]
 projectPlayer (Player playerName playerHitPoints (V3 x y z)) =
     [(V4 (x + 0.05) (y - 0.05) z 1, V3 redChannel 0 0),
-    (V4 (x + 0.0) (y + 0.05) z 1, V3 redChannel 0 0),
+    (V4 (x + 0.00) (y + 0.05) z 1, V3 redChannel 0 0),
+    (V4 (x - 0.05) (y - 0.05) z 1, V3 redChannel 0 0),
+
+    (V4 (x - 0.05) (y - 0.05) z 1, V3 redChannel 0 0),
+    (V4 (x + 0.00) (y - 0.05) (z + 0.05) 1, V3 redChannel 0 0),
+    (V4 (x + 0.05) (y - 0.05) z 1, V3 redChannel 0 0),
+
+    (V4 (x + 0.05) (y - 0.05) z 1, V3 redChannel 0 0),
+    (V4 (x + 0.00) (y - 0.05) (z + 0.05) 1, V3 redChannel 0 0),
+    (V4 (x + 0.00) (y + 0.05) z 1, V3 redChannel 0 0),
+
+    (V4 (x + 0.00) (y + 0.05) z 1, V3 redChannel 0 0),
+    (V4 (x + 0.00) (y - 0.05) (z + 0.05) 1, V3 redChannel 0 0),
     (V4 (x - 0.05) (y - 0.05) z 1, V3 redChannel 0 0)]
     where
     greenChannel = fromIntegral playerHitPoints / 100.0
@@ -44,9 +56,9 @@ translationMatrix x y z = V4 row1 row2 row3 row4
 
 main =
     runContextT defaultZeroContextFactory (ContextFormatColor RGB8) $ do
-        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (3 * length players)
+        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (12 * (length players))
         uniformBuffer :: Buffer os (Uniform (B Float)) <- newBuffer 6
-        writeBuffer vertexBuffer 0 (foldl (\acc x -> projectPlayer x ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
+        writeBuffer vertexBuffer 0 (foldl (\acc x -> (projectPlayer x) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
         shader :: CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Triangles (B4 Float, B3 Float)) <- compileShader $ do
             initialPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) <- toPrimitiveStream id
             rX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 0))
@@ -55,8 +67,8 @@ main =
             tX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 3))
             tY :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 4))
             tZ :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 5))
-            let transformedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = (first (translationMatrix tX tY tZ !*)) <$> ((first (rotationMatrix rX rY rZ !*)) <$> initialPrimitiveStream)
-            fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) transformedPrimitiveStream
+            let rotatedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = (first (translationMatrix tX tY tZ !*)) <$> ((first (rotationMatrix rX rY rZ !*)) <$> initialPrimitiveStream)
+            fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) rotatedPrimitiveStream
             drawContextColor (const (ContextColorOption NoBlending (V3 True True True))) fragmentStream
         loop vertexBuffer shader uniformBuffer [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
@@ -84,9 +96,9 @@ loop vertexBuffer shader uniformBuffer transformations = do
     closeRequested :: Bool <- GLFW.windowShouldClose
 
     unless closeRequested $ loop vertexBuffer shader uniformBuffer
-        [((head transformations) + extractInputValue rotateXKeyState reverseKeyState) `mod''` (2 * pi),
-        ((transformations !! 1) + extractInputValue rotateYKeyState reverseKeyState) `mod''` (2 * pi),
-        ((transformations !! 2) + extractInputValue rotateZKeyState reverseKeyState) `mod''` (2 * pi),
+        [(((head transformations) + extractInputValue rotateXKeyState reverseKeyState) `mod''` (2 * pi)),
+        (((transformations !! 1) + extractInputValue rotateYKeyState reverseKeyState) `mod''` (2 * pi)),
+        (((transformations !! 2) + extractInputValue rotateZKeyState reverseKeyState) `mod''` (2 * pi)),
         (transformations !! 3) + extractInputValue translateXKeyState reverseKeyState,
         (transformations !! 4) + extractInputValue translateYKeyState reverseKeyState,
         (transformations !! 5) + extractInputValue translateZKeyState reverseKeyState]
@@ -96,4 +108,3 @@ extractInputValue actionKeyState reverseKeyState
     | actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released = 0.01
     | actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed = -0.01
     | otherwise = 0
-
