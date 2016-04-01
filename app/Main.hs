@@ -67,11 +67,11 @@ players :: [Player]
 players = [Player "a" 0 (V3 0 0 0)]
 
 rotationMatrix :: S V Float -> S V Float -> S V Float -> V4 (V4 VFloat)
-rotationMatrix a b g = V4 row1 row2 row3 row4
+rotationMatrix x y z = V4 row1 row2 row3 row4
     where
-        row1 = V4 ((cos b) * (cos g))   (((cos g) * (sin a) * (sin b)) - ((cos a) * (sin g)))   (((cos a) * (cos g) * (sin b)) + ((sin a) * (sin g)))   0
-        row2 = V4 ((cos b) * (sin g))   (((cos a) * (cos g)) + ((sin a) * (sin b) * (sin g)))   (((cos a) * (sin b) * (sin g)) - ((cos g) * (sin a)))   0
-        row3 = V4 ((-1.0) * (sin b))    ((cos b) * (sin a))                                     ((cos a) * (cos b))                                     0
+        row1 = V4 ((cos y) * (cos z))   (((cos z) * (sin x) * (sin y)) - ((cos x) * (sin z)))   (((cos x) * (cos z) * (sin y)) + ((sin x) * (sin z)))   0
+        row2 = V4 ((cos y) * (sin z))   (((cos x) * (cos z)) + ((sin x) * (sin y) * (sin z)))   (((cos x) * (sin y) * (sin z)) - ((cos z) * (sin x)))   0
+        row3 = V4 ((-1.0) * (sin y))    ((cos y) * (sin x))                                     ((cos x) * (cos y))                                     0
         row4 = V4 0                     0                                                       0                                                       1
 
 translationMatrix :: S V Float -> S V Float -> S V Float -> V4 (V4 VFloat)
@@ -81,6 +81,9 @@ translationMatrix x y z = V4 row1 row2 row3 row4
         row2 = V4 0 1 0 y
         row3 = V4 0 0 1 z
         row4 = V4 0 0 0 1
+
+modelMatrix :: S V Float -> S V Float -> S V Float -> S V Float -> S V Float -> S V Float -> V4 (V4 VFloat)
+modelMatrix rX rY rZ tX tY tZ = (translationMatrix tX tY tZ) !*! (rotationMatrix rX rY rZ)
 
 main =
     runContextT defaultZeroContextFactory (ContextFormatColor RGB8) $ do
@@ -95,7 +98,7 @@ main =
             tX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 3))
             tY :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 4))
             tZ :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 5))
-            let transformedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = (first (translationMatrix tX tY tZ !*)) <$> ((first (rotationMatrix rX rY rZ !*)) <$> initialPrimitiveStream)
+            let transformedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = (first (modelMatrix rX rY rZ tX tY tZ !*)) <$> initialPrimitiveStream
             fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) transformedPrimitiveStream
             drawContextColor (const (ContextColorOption NoBlending (V3 True True True))) fragmentStream
         loop vertexBuffer shader uniformBuffer [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -136,3 +139,8 @@ extractInputValue actionKeyState reverseKeyState
     | actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released = 0.01
     | actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed = -0.01
     | otherwise = 0
+
+--1 1 * 2 2 = (1*2 + 1*2)
+--1 1   2 2
+
+
