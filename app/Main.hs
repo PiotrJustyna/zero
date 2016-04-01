@@ -85,6 +85,15 @@ translationMatrix x y z = V4 row1 row2 row3 row4
 modelMatrix :: S V Float -> S V Float -> S V Float -> S V Float -> S V Float -> S V Float -> V4 (V4 VFloat)
 modelMatrix rX rY rZ tX tY tZ = (translationMatrix tX tY tZ) !*! (rotationMatrix rX rY rZ)
 
+viewMatrix :: V4 (V4 VFloat)
+viewMatrix = translationMatrix 0.0 0.0 (-3.0)
+
+projectionMatrix :: V4 (V4 VFloat)
+projectionMatrix = perspective (pi / 2.0) 1.0 0.1 10.0
+
+mvpMatrix :: S V Float -> S V Float -> S V Float -> S V Float -> S V Float -> S V Float -> V4 (V4 VFloat)
+mvpMatrix rX rY rZ tX tY tZ = projectionMatrix !*! viewMatrix !*! modelMatrix rX rY rZ tX tY tZ
+
 main =
     runContextT defaultZeroContextFactory (ContextFormatColor RGB8) $ do
         vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (36 * (length players))
@@ -98,7 +107,7 @@ main =
             tX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 3))
             tY :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 4))
             tZ :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 5))
-            let transformedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = (first (modelMatrix rX rY rZ tX tY tZ !*)) <$> initialPrimitiveStream
+            let transformedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = (first (mvpMatrix rX rY rZ tX tY tZ !*)) <$> initialPrimitiveStream
             fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) transformedPrimitiveStream
             drawContextColor (const (ContextColorOption NoBlending (V3 True True True))) fragmentStream
         loop vertexBuffer shader uniformBuffer [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
