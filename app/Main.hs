@@ -12,31 +12,59 @@ defaultZeroContextFactory = GLFW.newContext' [] (GLFW.WindowConf 800 600 "zero")
 
 projectPlayer :: Player -> [(V4 Float, V3 Float)]
 projectPlayer (Player playerName playerHitPoints (V3 x y z)) =
-    [(V4 (x + 0.05) (y - 0.05) z 1, V3 redChannel 0 0),
-    (V4 (x + 0.00) (y + 0.05) z 1, V3 redChannel 0 0),
-    (V4 (x - 0.05) (y - 0.05) z 1, V3 redChannel 0 0),
+    [(V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0), --front
+    (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+    (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
 
-    (V4 (x - 0.05) (y - 0.05) z 1, V3 redChannel 0 0),
-    (V4 (x + 0.00) (y - 0.05) (z + 0.05) 1, V3 redChannel 0 0),
-    (V4 (x + 0.05) (y - 0.05) z 1, V3 redChannel 0 0),
+    (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+    (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+    (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
 
-    (V4 (x + 0.05) (y - 0.05) z 1, V3 redChannel 0 0),
-    (V4 (x + 0.00) (y - 0.05) (z + 0.05) 1, V3 redChannel 0 0),
-    (V4 (x + 0.00) (y + 0.05) z 1, V3 redChannel 0 0),
+    (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0), -- right
+    (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+    (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
 
-    (V4 (x + 0.00) (y + 0.05) z 1, V3 redChannel 0 0),
-    (V4 (x + 0.00) (y - 0.05) (z + 0.05) 1, V3 redChannel 0 0),
-    (V4 (x - 0.05) (y - 0.05) z 1, V3 redChannel 0 0)]
+    (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+    (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+    (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+    (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0), -- back
+    (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+    (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+    (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+    (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+    (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+    (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0), -- left
+    (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+    (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+    (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+    (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+    (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+    (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0), -- top
+    (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+    (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+    (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+    (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+    (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+    (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0), -- bottom
+    (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+    (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+    (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+    (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+    (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0)]
     where
     greenChannel = fromIntegral playerHitPoints / 100.0
     redChannel = 1.0 - fromIntegral playerHitPoints / 100.0
 
 players :: [Player]
-players = [Player "a" 0 (V3 (-0.5) 0 0),
-            Player "b" 20 (V3 0 0 0),
-            Player "c" 40 (V3 0.5 0 0),
-            Player "d" 60 (V3 (-0.25) 0.25 0),
-            Player "e" 80 (V3 0.25 0.25 0)]
+players = [Player "a" 0 (V3 0 0 0)]
 
 rotationMatrix :: S V Float -> S V Float -> S V Float -> V4 (V4 VFloat)
 rotationMatrix a b g = V4 row1 row2 row3 row4
@@ -56,7 +84,7 @@ translationMatrix x y z = V4 row1 row2 row3 row4
 
 main =
     runContextT defaultZeroContextFactory (ContextFormatColor RGB8) $ do
-        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (12 * (length players))
+        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (36 * (length players))
         uniformBuffer :: Buffer os (Uniform (B Float)) <- newBuffer 6
         writeBuffer vertexBuffer 0 (foldl (\acc x -> (projectPlayer x) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
         shader :: CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Triangles (B4 Float, B3 Float)) <- compileShader $ do
@@ -67,8 +95,8 @@ main =
             tX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 3))
             tY :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 4))
             tZ :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 5))
-            let rotatedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = (first (translationMatrix tX tY tZ !*)) <$> ((first (rotationMatrix rX rY rZ !*)) <$> initialPrimitiveStream)
-            fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) rotatedPrimitiveStream
+            let transformedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = (first (translationMatrix tX tY tZ !*)) <$> ((first (rotationMatrix rX rY rZ !*)) <$> initialPrimitiveStream)
+            fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) transformedPrimitiveStream
             drawContextColor (const (ContextColorOption NoBlending (V3 True True True))) fragmentStream
         loop vertexBuffer shader uniformBuffer [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
