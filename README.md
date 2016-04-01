@@ -15,4 +15,4 @@ in a sort-of-real-life project. I have always enjoyed playing with real-time ren
 
 # Sample Image
 
-![rendering](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/9.png)
+![rendering](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/10.png)
