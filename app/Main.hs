@@ -99,21 +99,21 @@ main =
         vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (36 * (length players))
         uniformBuffer :: Buffer os (Uniform (B Float)) <- newBuffer 6
         writeBuffer vertexBuffer 0 (foldl (\acc x -> (projectPlayer x) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
-        shader :: CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Triangles (B4 Float, B3 Float)) <- compileShader $ do
-            initialPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) <- toPrimitiveStream id
+        shader :: CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Lines (B4 Float, B3 Float)) <- compileShader $ do
+            initialPrimitiveStream :: PrimitiveStream Lines (VertexFormat(B4 Float, B3 Float)) <- toPrimitiveStream id
             rX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 0))
             rY :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 1))
             rZ :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 2))
             tX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 3))
             tY :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 4))
             tZ :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 5))
-            let transformedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = (first (mvpMatrix rX rY rZ tX tY tZ !*)) <$> initialPrimitiveStream
+            let transformedPrimitiveStream :: PrimitiveStream Lines (VertexFormat(B4 Float, B3 Float)) = (first (mvpMatrix rX rY rZ tX tY tZ !*)) <$> initialPrimitiveStream
             fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) transformedPrimitiveStream
             drawContextColor (const (ContextColorOption NoBlending (V3 True True True))) fragmentStream
         loop vertexBuffer shader uniformBuffer [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 loop :: Buffer os (B4 Float, B3 Float)
-    -> CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Triangles (B4 Float, B3 Float))
+    -> CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Lines (B4 Float, B3 Float))
     -> Buffer os (Uniform (B Float))
     -> [Float]
     -> ContextT GLFW.GLFWWindow os (ContextFormat RGBFloat ()) IO ()
@@ -122,7 +122,7 @@ loop vertexBuffer shader uniformBuffer transformations = do
     render $ do
         clearContextColor (V3 0.2 0.2 0.2)
         vertexArray :: VertexArray () (B4 Float, B3 Float) <- newVertexArray vertexBuffer
-        let primitiveArray :: PrimitiveArray Triangles (B4 Float, B3 Float) = toPrimitiveArray TriangleList vertexArray
+        let primitiveArray :: PrimitiveArray Lines (B4 Float, B3 Float) = toPrimitiveArray LineList vertexArray
         shader primitiveArray
     swapContextBuffers
 
