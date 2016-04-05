@@ -148,8 +148,3 @@ extractInputValue actionKeyState reverseKeyState
     | actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Released = 0.01
     | actionKeyState == GLFW.KeyState'Pressed && reverseKeyState == GLFW.KeyState'Pressed = -0.01
     | otherwise = 0
-
---1 1 * 2 2 = (1*2 + 1*2)
---1 1   2 2
-
-
