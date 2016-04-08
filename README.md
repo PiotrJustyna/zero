@@ -14,6 +14,7 @@ Zero is a silly little realtime rendering project I'm working on in my spare tim
 
 in a sort-of-real-life project. I have always enjoyed playing with real-time rendering and Haskell, so one day this silly little idea dawned on me: why not combine both of them and actually write something that lives and breathes? Zero is just that - let's see what it evolves into :smile: 
 
-# Sample Image
+# Sample Images
 
-![rendering](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/11.png)
+![triangles](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/11.png)
+![lines](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/14.png)
