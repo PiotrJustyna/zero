@@ -2,6 +2,7 @@
 module Main where
 
 import Player
+import Representation
 import Graphics.GPipe
 import qualified "GPipe-GLFW" Graphics.GPipe.Context.GLFW as GLFW
 import Control.Monad (unless)
@@ -9,59 +10,6 @@ import Control.Arrow (first)
 
 defaultZeroContextFactory :: ContextFactory c ds GLFW.GLFWWindow
 defaultZeroContextFactory = GLFW.newContext' [] (GLFW.WindowConf 800 600 "zero")
-
-projectPlayer :: Player -> [(V4 Float, V3 Float)]
-projectPlayer (Player playerName playerHitPoints (V3 x y z)) =
-    [(V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0), --front
-    (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
-    (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
-
-    (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
-    (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
-    (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
-
-    (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0), -- right
-    (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-    (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
-
-    (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
-    (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-    (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-
-    (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0), -- back
-    (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-    (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-
-    (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-    (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-    (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-
-    (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0), -- left
-    (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
-    (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-
-    (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
-    (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-    (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-
-    (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0), -- top
-    (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-    (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-
-    (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-    (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
-    (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
-
-    (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0), -- bottom
-    (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-    (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-
-    (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
-    (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
-    (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0)]
-    where
-    greenChannel = fromIntegral playerHitPoints / 100.0
-    redChannel = 1.0 - fromIntegral playerHitPoints / 100.0
 
 players :: [Player]
 players = [Player "a" 0 (V3 0 0 0)]
@@ -96,24 +44,24 @@ mvpMatrix rX rY rZ tX tY tZ = projectionMatrix !*! viewMatrix !*! modelMatrix rX
 
 main =
     runContextT defaultZeroContextFactory (ContextFormatColor RGB8) $ do
-        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (36 * (length players))
+        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer ((numberOfLineVertices (head players)) * (length players))
         uniformBuffer :: Buffer os (Uniform (B Float)) <- newBuffer 6
-        writeBuffer vertexBuffer 0 (foldl (\acc x -> (projectPlayer x) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
-        shader :: CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Triangles (B4 Float, B3 Float)) <- compileShader $ do
-            initialPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) <- toPrimitiveStream id
+        writeBuffer vertexBuffer 0 (foldl (\acc x -> (asLines x) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
+        shader :: CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Lines (B4 Float, B3 Float)) <- compileShader $ do
+            initialPrimitiveStream :: PrimitiveStream Lines (VertexFormat(B4 Float, B3 Float)) <- toPrimitiveStream id
             rX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 0))
             rY :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 1))
             rZ :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 2))
             tX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 3))
             tY :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 4))
             tZ :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 5))
-            let transformedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = (first (mvpMatrix rX rY rZ tX tY tZ !*)) <$> initialPrimitiveStream
+            let transformedPrimitiveStream :: PrimitiveStream Lines (VertexFormat(B4 Float, B3 Float)) = (first (mvpMatrix rX rY rZ tX tY tZ !*)) <$> initialPrimitiveStream
             fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) transformedPrimitiveStream
             drawContextColor (const (ContextColorOption NoBlending (V3 True True True))) fragmentStream
         loop vertexBuffer shader uniformBuffer [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 loop :: Buffer os (B4 Float, B3 Float)
-    -> CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Triangles (B4 Float, B3 Float))
+    -> CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Lines (B4 Float, B3 Float))
     -> Buffer os (Uniform (B Float))
     -> [Float]
     -> ContextT GLFW.GLFWWindow os (ContextFormat RGBFloat ()) IO ()
@@ -122,7 +70,7 @@ loop vertexBuffer shader uniformBuffer transformations = do
     render $ do
         clearContextColor (V3 0.2 0.2 0.2)
         vertexArray :: VertexArray () (B4 Float, B3 Float) <- newVertexArray vertexBuffer
-        let primitiveArray :: PrimitiveArray Triangles (B4 Float, B3 Float) = toPrimitiveArray TriangleList vertexArray
+        let primitiveArray :: PrimitiveArray Lines (B4 Float, B3 Float) = toPrimitiveArray LineList vertexArray
         shader primitiveArray
     swapContextBuffers
 

@@ -6,6 +6,7 @@ module Player
     hit,
     heal) where
 
+import Representation
 import Data.Word
 import Graphics.GPipe
 
@@ -20,6 +21,119 @@ instance Show Player where
         "Player: " ++ playerName ++
         "\nHit points: " ++ show playerHitPoints ++
         "\nLocation: x=" ++ show x ++ ", y=" ++ show y ++ ", z=" ++ show z
+
+instance Projection Player where
+    asPoints (Player playerName playerHitPoints (V3 x y z)) =
+        [(V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0), --top
+        (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0), --bottom
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0)]
+        where
+            greenChannel = fromIntegral playerHitPoints / 100.0
+            redChannel = 1.0 - fromIntegral playerHitPoints / 100.0
+
+    numberOfPointVertices x = 8
+
+    asLines (Player playerName playerHitPoints (V3 x y z)) =
+        [(V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0), --top
+        (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0), --bottom
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0), --sides
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0)]
+        where
+            greenChannel = fromIntegral playerHitPoints / 100.0
+            redChannel = 1.0 - fromIntegral playerHitPoints / 100.0
+
+    numberOfLineVertices x = 24
+
+    asTriangles (Player playerName playerHitPoints (V3 x y z)) =
+        [(V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0), --front
+        (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0), -- right
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0), -- back
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0), -- left
+        (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0), -- top
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0), -- bottom
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0)]
+        where
+            greenChannel = fromIntegral playerHitPoints / 100.0
+            redChannel = 1.0 - fromIntegral playerHitPoints / 100.0
+
+    numberOfTriangleVertices x = 36
 
 hit :: Player -> Player
 hit (Player a b c) = Player a (b - 1) c
