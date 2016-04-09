@@ -4,7 +4,9 @@ module Player
     PlayerHitPoints,
     PlayerLocation,
     hit,
-    heal) where
+    heal,
+    rawNormals,
+    zipModelVerticesAndNormalVertices) where
 
 import Representation
 import Data.Word
@@ -152,3 +154,66 @@ hit (Player a b c) = Player a (b - 1) c
 
 heal :: Player -> Player
 heal (Player a b c) = Player a (b + 1) c
+
+rawNormals :: [(V4 Float, V3 Float)]
+rawNormals =
+    [(V4 0.0 0.1 0.0 1.0, white), -- top
+    (V4 0.0 0.1 0.0 1.0, white),
+
+    (V4 0.0 0.1 0.0 1.0, white),
+    (V4 0.0 0.1 0.0 1.0, white),
+
+    (V4 0.0 0.1 0.0 1.0, white),
+    (V4 0.0 0.1 0.0 1.0, white),
+
+    (V4 0.0 0.1 0.0 1.0, white),
+    (V4 0.0 0.1 0.0 1.0, white),
+
+    (V4 0.0 (-0.1) 0.0 1.0, white), -- bottom
+    (V4 0.0 (-0.1) 0.0 1.0, white),
+
+    (V4 0.0 (-0.1) 0.0 1.0, white),
+    (V4 0.0 (-0.1) 0.0 1.0, white),
+
+    (V4 0.0 (-0.1) 0.0 1.0, white),
+    (V4 0.0 (-0.1) 0.0 1.0, white),
+
+    (V4 0.0 (-0.1) 0.0 1.0, white),
+    (V4 0.0 (-0.1) 0.0 1.0, white),
+
+    (V4 0.0 0.0 0.1 1.0, white), -- sides, front right -> front facing
+    (V4 0.0 0.0 0.1 1.0, white),
+
+    (V4 0.1 0.0 0.0 1.0, white), -- front right -> right facing
+    (V4 0.1 0.0 0.0 1.0, white),
+
+    (V4 0.0 0.0 0.1 1.0, white), -- front left -> front facing
+    (V4 0.0 0.0 0.1 1.0, white),
+
+    (V4 (-0.1) 0.0 0.0 1.0, white), -- front left -> left facing
+    (V4 (-0.1) 0.0 0.0 1.0, white),
+
+    (V4 0.0 0.0 (-0.1) 1.0, white), -- back left -> back facing
+    (V4 0.0 0.0 (-0.1) 1.0, white),
+
+    (V4 (-0.1) 0.0 0.0 1.0, white), -- back left -> left facing
+    (V4 (-0.1) 0.0 0.0 1.0, white),
+
+    (V4 0.0 0.0 (-0.1) 1.0, white), -- back right -> back facing
+    (V4 0.0 0.0 (-0.1) 1.0, white),
+
+    (V4 0.1 0.0 0.0 1.0, white), -- back right -> right facing
+    (V4 0.1 0.0 0.0 1.0, white)]
+    where
+        white = V3 1.0 1.0 1.0
+
+zipModelVerticesAndNormalVertices :: [(V4 Float, V3 Float)] -> [(V4 Float, V3 Float)] -> [(V4 Float, V3 Float)]
+zipModelVerticesAndNormalVertices a b =
+    foldl
+        (\acc (x, y) -> (x : (y : acc)))
+        [] $
+        zipWith
+            (\(V4 mVX mVY mVZ mVW, mC) (V4 nVX nVY nVZ nVW, nC) ->
+                ((V4 mVX mVY mVZ 1.0, nC), (V4 (mVX + nVX) (mVY + nVY) (mVZ + nVZ) 1.0, nC)))
+            a
+            b
