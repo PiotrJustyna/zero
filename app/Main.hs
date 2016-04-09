@@ -5,8 +5,8 @@ import Player
 import Representation
 import Graphics.GPipe
 import qualified "GPipe-GLFW" Graphics.GPipe.Context.GLFW as GLFW
-import Control.Monad (unless)
 import Control.Arrow (first)
+import Control.Monad (unless)
 
 defaultZeroContextFactory :: ContextFactory c ds GLFW.GLFWWindow
 defaultZeroContextFactory = GLFW.newContext' [] (GLFW.WindowConf 800 600 "zero")
@@ -37,18 +37,83 @@ viewMatrix :: V4 (V4 VFloat)
 viewMatrix = translationMatrix 0.0 0.0 (-3.0)
 
 projectionMatrix :: V4 (V4 VFloat)
-projectionMatrix = perspective (pi / 2.0) 1.0 0.1 10.0
+projectionMatrix = perspective (pi / 4.0) 1.0 0.1 10.0
 
 mvpMatrix :: S V Float -> S V Float -> S V Float -> S V Float -> S V Float -> S V Float -> V4 (V4 VFloat)
 mvpMatrix rX rY rZ tX tY tZ = projectionMatrix !*! viewMatrix !*! modelMatrix rX rY rZ tX tY tZ
 
+rawNormals =
+    [(V4 0.0 0.1 0.0 1.0, white), -- top
+    (V4 0.0 0.1 0.0 1.0, white),
+
+    (V4 0.0 0.1 0.0 1.0, white),
+    (V4 0.0 0.1 0.0 1.0, white),
+
+    (V4 0.0 0.1 0.0 1.0, white),
+    (V4 0.0 0.1 0.0 1.0, white),
+
+    (V4 0.0 0.1 0.0 1.0, white),
+    (V4 0.0 0.1 0.0 1.0, white),
+
+    (V4 0.0 (-0.1) 0.0 1.0, white), -- bottom
+    (V4 0.0 (-0.1) 0.0 1.0, white),
+
+    (V4 0.0 (-0.1) 0.0 1.0, white),
+    (V4 0.0 (-0.1) 0.0 1.0, white),
+
+    (V4 0.0 (-0.1) 0.0 1.0, white),
+    (V4 0.0 (-0.1) 0.0 1.0, white),
+
+    (V4 0.0 (-0.1) 0.0 1.0, white),
+    (V4 0.0 (-0.1) 0.0 1.0, white),
+
+    (V4 0.0 0.0 0.1 1.0, white), -- sides, front right -> front facing
+    (V4 0.0 0.0 0.1 1.0, white),
+
+    (V4 0.1 0.0 0.0 1.0, white), -- front right -> right facing
+    (V4 0.1 0.0 0.0 1.0, white),
+
+    (V4 0.0 0.0 0.1 1.0, white), -- front left -> front facing
+    (V4 0.0 0.0 0.1 1.0, white),
+
+    (V4 (-0.1) 0.0 0.0 1.0, white), -- front left -> left facing
+    (V4 (-0.1) 0.0 0.0 1.0, white),
+
+    (V4 0.0 0.0 (-0.1) 1.0, white), -- back left -> back facing
+    (V4 0.0 0.0 (-0.1) 1.0, white),
+
+    (V4 (-0.1) 0.0 0.0 1.0, white), -- back left -> left facing
+    (V4 (-0.1) 0.0 0.0 1.0, white),
+
+    (V4 0.0 0.0 (-0.1) 1.0, white), -- back right -> back facing
+    (V4 0.0 0.0 (-0.1) 1.0, white),
+
+    (V4 0.1 0.0 0.0 1.0, white), -- back right -> right facing
+    (V4 0.1 0.0 0.0 1.0, white)]
+    where
+        white = V3 1.0 1.0 1.0
+
+zipModelVerticesAndNormalVertices :: [(V4 Float, V3 Float)] -> [(V4 Float, V3 Float)] -> [(V4 Float, V3 Float)]
+zipModelVerticesAndNormalVertices a b =
+    foldl
+        (\acc (x, y) -> (x : (y : acc)))
+        [] $
+        zipWith
+            (\(V4 mVX mVY mVZ mVW, mC) (V4 nVX nVY nVZ nVW, nC) ->
+                ((V4 mVX mVY mVZ 1.0, nC), (V4 (mVX + nVX) (mVY + nVY) (mVZ + nVZ) 1.0, nC)))
+            a
+            b
+
 main =
     runContextT defaultZeroContextFactory (ContextFormatColor RGB8) $ do
-        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer ((numberOfLineVertices (head players)) * (length players))
+        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (((numberOfLineVertices (head players)) * 3 * (length players)))
         uniformBuffer :: Buffer os (Uniform (B Float)) <- newBuffer 6
-        writeBuffer vertexBuffer 0 (foldl (\acc x -> (asLines x) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
-        shader :: CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Lines (B4 Float, B3 Float)) <- compileShader $ do
-            initialPrimitiveStream :: PrimitiveStream Lines (VertexFormat(B4 Float, B3 Float)) <- toPrimitiveStream id
+        let representationOfPlayers = (foldl (\acc x -> (asLines x) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
+        writeBuffer vertexBuffer 0 representationOfPlayers
+        writeBuffer vertexBuffer ((numberOfLineVertices (head players)) * (length players)) (zipModelVerticesAndNormalVertices representationOfPlayers rawNormals)
+        shader :: CompiledShader os (ContextFormat RGBFloat ()) ((PrimitiveArray Lines (B4 Float, B3 Float)), (PrimitiveArray Lines (B4 Float, B3 Float))) <- compileShader $ do
+            initialPrimitiveStream :: PrimitiveStream Lines (VertexFormat (B4 Float, B3 Float)) <- toPrimitiveStream (\x -> fst x)
+            normalPrimitiveStream :: PrimitiveStream Lines (VertexFormat (B4 Float, B3 Float)) <- toPrimitiveStream (\x -> snd x)
             rX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 0))
             rY :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 1))
             rZ :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 2))
@@ -56,12 +121,14 @@ main =
             tY :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 4))
             tZ :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 5))
             let transformedPrimitiveStream :: PrimitiveStream Lines (VertexFormat(B4 Float, B3 Float)) = (first (mvpMatrix rX rY rZ tX tY tZ !*)) <$> initialPrimitiveStream
-            fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) transformedPrimitiveStream
+            let transformedNormalPrimitiveStream :: PrimitiveStream Lines (VertexFormat(B4 Float, B3 Float)) = (first (mvpMatrix rX rY rZ tX tY tZ !*)) <$> normalPrimitiveStream
+            let combinedPrimitiveStreams = transformedPrimitiveStream `mappend` transformedNormalPrimitiveStream
+            fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) combinedPrimitiveStreams
             drawContextColor (const (ContextColorOption NoBlending (V3 True True True))) fragmentStream
         loop vertexBuffer shader uniformBuffer [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 loop :: Buffer os (B4 Float, B3 Float)
-    -> CompiledShader os (ContextFormat RGBFloat ()) (PrimitiveArray Lines (B4 Float, B3 Float))
+    -> CompiledShader os (ContextFormat RGBFloat ()) ((PrimitiveArray Lines (B4 Float, B3 Float)), (PrimitiveArray Lines (B4 Float, B3 Float)))
     -> Buffer os (Uniform (B Float))
     -> [Float]
     -> ContextT GLFW.GLFWWindow os (ContextFormat RGBFloat ()) IO ()
@@ -70,8 +137,9 @@ loop vertexBuffer shader uniformBuffer transformations = do
     render $ do
         clearContextColor (V3 0.2 0.2 0.2)
         vertexArray :: VertexArray () (B4 Float, B3 Float) <- newVertexArray vertexBuffer
-        let primitiveArray :: PrimitiveArray Lines (B4 Float, B3 Float) = toPrimitiveArray LineList vertexArray
-        shader primitiveArray
+        let primitiveArray :: PrimitiveArray Lines (B4 Float, B3 Float) = toPrimitiveArray LineList (takeVertices ((numberOfLineVertices (head players)) * (length players)) vertexArray)
+        let normalArray :: PrimitiveArray Lines (B4 Float, B3 Float) = toPrimitiveArray LineList (dropVertices ((numberOfLineVertices (head players)) * (length players)) vertexArray)
+        shader (primitiveArray, normalArray)
     swapContextBuffers
 
     rotateXKeyState :: GLFW.KeyState <- GLFW.getKey GLFW.Key'Q
