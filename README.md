@@ -16,5 +16,4 @@ in a sort-of-real-life project. I have always enjoyed playing with real-time ren
 
 # Sample Images
 
-![triangles](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/11.png)
-![lines](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/14.png)
+![lines and normals](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/15.png)
