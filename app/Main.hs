@@ -48,7 +48,8 @@ main =
         uniformBuffer :: Buffer os (Uniform (B Float)) <- newBuffer 6
         let representationOfPlayers = (foldl (\acc x -> (asLines x) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
         writeBuffer vertexBuffer 0 representationOfPlayers
-        writeBuffer vertexBuffer ((numberOfLineVertices (head players)) * (length players)) (zipModelVerticesAndNormalVertices representationOfPlayers rawNormals)
+        let rawNormals1 = calculateRawNormals representationOfPlayers
+        writeBuffer vertexBuffer ((numberOfLineVertices (head players)) * (length players)) (zipModelVerticesAndNormalVertices representationOfPlayers rawNormals1)
         shader :: CompiledShader os (ContextFormat RGBFloat ()) ((PrimitiveArray Lines (B4 Float, B3 Float)), (PrimitiveArray Lines (B4 Float, B3 Float))) <- compileShader $ do
             initialPrimitiveStream :: PrimitiveStream Lines (VertexFormat (B4 Float, B3 Float)) <- toPrimitiveStream (\x -> fst x)
             normalPrimitiveStream :: PrimitiveStream Lines (VertexFormat (B4 Float, B3 Float)) <- toPrimitiveStream (\x -> snd x)

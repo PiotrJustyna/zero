@@ -1,6 +1,6 @@
 name:                zero
-version:             0.1.1.8
-synopsis:            A silly little game project.
+version:             0.1.1.10
+synopsis:            A silly little realtime rendering project.
 description:         Please see README.md
 homepage:            http://github.com/piotrjustyna/zero#readme
 license:             BSD3
