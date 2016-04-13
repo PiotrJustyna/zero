@@ -16,4 +16,5 @@ in a sort-of-real-life project. I have always enjoyed playing with real-time ren
 
 # Sample Images
 
-![lines and normals](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/17.png)
+![lines and normals - cube](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/17.png)
+![lines and normals - tetrahedron](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/18.png)
