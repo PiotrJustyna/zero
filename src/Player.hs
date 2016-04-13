@@ -42,19 +42,118 @@ instance Projection Player where
     numberOfPointVertices x = 8
 
     asLines (Player playerName playerHitPoints (V3 x y z)) =
-        [(V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0), -- top
+        [(V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0), -- top 1
         (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
 
         (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
         (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
 
         (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
-        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0)]
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0), -- top 2
+        (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0), -- front 1
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0), -- front 2
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0), -- right 1
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0), -- right 2
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0), -- left 1
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0), -- left 2
+        (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y + 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0), -- back 1
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0), -- back 2
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y + 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0), -- bottom 1
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0), -- bottom 2
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x - 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+
+        (V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0),
+        (V4 (x + 0.5) (y - 0.5) (z + 0.5) 1, V3 redChannel 0 0)]
         where
             greenChannel = fromIntegral playerHitPoints / 100.0
             redChannel = 1.0 - fromIntegral playerHitPoints / 100.0
 
-    numberOfLineVertices x = 6
+    numberOfLineVertices x = 72
 
     asTriangles (Player playerName playerHitPoints (V3 x y z)) =
         [(V4 (x + 0.5) (y - 0.5) (z - 0.5) 1, V3 redChannel 0 0), -- back
