@@ -16,5 +16,11 @@ in a sort-of-real-life project. I have always enjoyed playing with real-time ren
 
 # Sample Images
 
+## Linux
+
 ![lines and normals - cube](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/17.png)
 ![lines and normals - tetrahedron](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/18.png)
+
+## Windows
+
+![lines and normals - tetrahedron](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/19.png)
