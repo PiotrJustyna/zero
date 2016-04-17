@@ -224,7 +224,7 @@ calculateRawNormalsForLines [] = []
 
 calculateRawNormalsForPoints :: [(V4 Float, V3 Float)] -> [(V4 Float, V3 Float)]
 calculateRawNormalsForPoints ((V4 x0X x0Y x0Z x0W, x0C) : (V4 x1X x1Y x1Z x1W, x1C) : (V4 x2X x2Y x2Z x2W, x2C) : xs) =
-    normal1 : normal1 : normal2 : normal2 : normal3 : normal3 : (calculateRawNormalsForPoints xs)
+    normal1 : normal2 : normal3 : (calculateRawNormalsForPoints xs)
     where
         normal1 = (V4 (n1X / 10.0) (n1Y / 10.0) (n1Z / 10.0) 1.0, white)
         normal2 = (V4 (n2X / 10.0) (n2Y / 10.0) (n2Z / 10.0) 1.0, white)
