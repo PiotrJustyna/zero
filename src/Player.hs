@@ -133,13 +133,19 @@ zipModelVerticesAndNormalVertices a b =
             a
             b
 
-calculateRawNormalsForPoints :: [(V4 Float, V3 Float)] -> [(V4 Float, V3 Float)]
-calculateRawNormalsForPoints ((V4 x0X x0Y x0Z x0W, x0C) : (V4 x1X x1Y x1Z x1W, x1C) : (V4 x2X x2Y x2Z x2W, x2C) : xs) =
-    normal1 : normal2 : normal3 : (calculateRawNormalsForPoints xs)
+calculateNormalsForSurfaceVectors :: (V3 Float)
+    -> (V3 Float)
+    -> (V3 Float)
+    -> (V3 Float)
+    -> (V3 Float)
+    -> (V3 Float)
+    -> [V4 Float]
+calculateNormalsForSurfaceVectors (V3 u1X u1Y u1Z) (V3 u2X u2Y u2Z) (V3 u3X u3Y u3Z) (V3 v1X v1Y v1Z) (V3 v2X v2Y v2Z) (V3 v3X v3Y v3Z) =
+    normal1 : normal2 : normal3 : []
     where
-        normal1 = (V4 (n1X / 10.0) (n1Y / 10.0) (n1Z / 10.0) 1.0, white)
-        normal2 = (V4 (n2X / 10.0) (n2Y / 10.0) (n2Z / 10.0) 1.0, white)
-        normal3 = (V4 (n3X / 10.0) (n3Y / 10.0) (n3Z / 10.0) 1.0, white)
+        normal1 = V4 (n1X / 10.0) (n1Y / 10.0) (n1Z / 10.0) 1.0
+        normal2 = V4 (n2X / 10.0) (n2Y / 10.0) (n2Z / 10.0) 1.0
+        normal3 = V4 (n3X / 10.0) (n3Y / 10.0) (n3Z / 10.0) 1.0
 
         n1X = (u1Y * v1Z) - (u1Z * v1Y)
         n1Y = (u1Z * v1X) - (u1X * v1Z)
@@ -152,6 +158,12 @@ calculateRawNormalsForPoints ((V4 x0X x0Y x0Z x0W, x0C) : (V4 x1X x1Y x1Z x1W, x
         n3X = (u3Y * v3Z) - (u3Z * v3Y)
         n3Y = (u3Z * v3X) - (u3X * v3Z)
         n3Z = (u3X * v3Y) - (u3Y * v3X)
+
+calculateRawNormalsForPoints :: [(V4 Float, V3 Float)] -> [(V4 Float, V3 Float)]
+calculateRawNormalsForPoints ((V4 x0X x0Y x0Z x0W, x0C) : (V4 x1X x1Y x1Z x1W, x1C) : (V4 x2X x2Y x2Z x2W, x2C) : xs) =
+    (head normals, white) : (normals !! 1, white) : (normals !! 2, white) : (calculateRawNormalsForPoints xs)
+    where
+        normals = calculateNormalsForSurfaceVectors (V3 u1X u1Y u1Z) (V3 u2X u2Y u2Z) (V3 u3X u3Y u3Z) (V3 v1X v1Y v1Z) (V3 v2X v2Y v2Z) (V3 v3X v3Y v3Z)
 
         -- u1 = p2 - p1 or x1 - x0
         -- v1 = p3 - p1 or x2 - x0
@@ -190,23 +202,9 @@ calculateRawNormalsForPoints [] = []
 
 calculateRawNormalsForLines :: [(V4 Float, V3 Float)] -> [(V4 Float, V3 Float)]
 calculateRawNormalsForLines ((V4 x0X x0Y x0Z x0W, x0C) : x1 : (V4 x2X x2Y x2Z x2W, x2C) : x3 : (V4 x4X x4Y x4Z x4W, x4C) : x5 : xs) =
-    normal1 : normal1 : normal2 : normal2 : normal3 : normal3 : (calculateRawNormalsForLines xs)
+    (head normals, white) : (normals !! 1, white) : (normals !! 2, white) : (calculateRawNormalsForPoints xs)
     where
-        normal1 = (V4 (n1X / 10.0) (n1Y / 10.0) (n1Z / 10.0) 1.0, white)
-        normal2 = (V4 (n2X / 10.0) (n2Y / 10.0) (n2Z / 10.0) 1.0, white)
-        normal3 = (V4 (n3X / 10.0) (n3Y / 10.0) (n3Z / 10.0) 1.0, white)
-
-        n1X = (u1Y * v1Z) - (u1Z * v1Y)
-        n1Y = (u1Z * v1X) - (u1X * v1Z)
-        n1Z = (u1X * v1Y) - (u1Y * v1X)
-
-        n2X = (u2Y * v2Z) - (u2Z * v2Y)
-        n2Y = (u2Z * v2X) - (u2X * v2Z)
-        n2Z = (u2X * v2Y) - (u2Y * v2X)
-
-        n3X = (u3Y * v3Z) - (u3Z * v3Y)
-        n3Y = (u3Z * v3X) - (u3X * v3Z)
-        n3Z = (u3X * v3Y) - (u3Y * v3X)
+        normals = calculateNormalsForSurfaceVectors (V3 u1X u1Y u1Z) (V3 u2X u2Y u2Z) (V3 u3X u3Y u3Z) (V3 v1X v1Y v1Z) (V3 v2X v2Y v2Z) (V3 v3X v3Y v3Z)
 
         -- u1 = p2 - p1 or x2 - x0
         -- v1 = p3 - p1 or x4 - x0
