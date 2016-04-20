@@ -27,27 +27,27 @@ instance Show Player where
         "\nLocation: x=" ++ show x ++ ", y=" ++ show y ++ ", z=" ++ show z
 
 instance Projection Player where
-    asPoints (Player playerName playerHitPoints (V3 x y z)) =
-        [(V4 (x + 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0), -- bottom
-        (V4 (x - 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0),
-        (V4 (x + 0.0) (y + 0.0) (z - ((sqrt 3) / 2.0)) 1, V3 redChannel 0 0),
 
-        (V4 (x + 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0), -- right
-        (V4 (x + 0.0) (y + 0.0) (z - ((sqrt 3) / 2.0)) 1, V3 redChannel 0 0),
-        (V4 (x + 0.0) (y + ((sqrt 3) / 2.0)) (z - (1.0 / 3.0)) 1, V3 redChannel 0 0),
+    asPoints player =
+        [(V4    0.5     0.0                 0.0                 1, red), -- bottom
+        (V4     (-0.5)  0.0                 0.0                 1, red),
+        (V4     0.0     0.0                 ((sqrt 3) / (-2.0)) 1, red),
 
-        (V4 (x - 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0), -- left
-        (V4 (x + 0.0) (y + ((sqrt 3) / 2.0)) (z - (1.0 / 3.0)) 1, V3 redChannel 0 0),
-        (V4 (x + 0.0) (y + 0.0) (z - ((sqrt 3) / 2.0)) 1, V3 redChannel 0 0),
+        (V4     0.5     0.0                 0.0                 1, red), -- right
+        (V4     0.0     0.0                 ((sqrt 3) / (-2.0)) 1, red),
+        (V4     0.0     ((sqrt 3) / 2.0)    (1.0 / (-3.0))      1, red),
 
-        (V4 (x + 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0), -- front
-        (V4 (x + 0.0) (y + ((sqrt 3) / 2.0)) (z - (1.0 / 3.0)) 1, V3 redChannel 0 0),
-        (V4 (x - 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0)]
+        (V4     (-0.5)  0.0                 0.0                 1, red), -- left
+        (V4     0.0     ((sqrt 3) / 2.0)    (1.0 / (-3.0))      1, red),
+        (V4     0.0     0.0                 ((sqrt 3) / (-2.0)) 1, red),
+
+        (V4     0.5     0.0                 0.0                 1, red), -- front
+        (V4     0.0     ((sqrt 3) / 2.0)    (1.0 / (-3.0))      1, red),
+        (V4     (-0.5)  0.0                 0.0                 1, red)]
         where
-            greenChannel = fromIntegral playerHitPoints / 100.0
-            redChannel = 1.0 - fromIntegral playerHitPoints / 100.0
+            red = V3 1.0 0.0 0.0
 
-    numberOfPointVertices x = 12
+    numberOfPointVertices x = length $ asPoints x
 
     asLines (Player playerName playerHitPoints (V3 x y z)) =
         [(V4 (x + 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0), -- bottom
@@ -91,27 +91,9 @@ instance Projection Player where
 
     numberOfLineVertices x = 24
 
-    asTriangles (Player playerName playerHitPoints (V3 x y z)) =
-        [(V4 (x + 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0), -- bottom
-        (V4 (x - 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0),
-        (V4 (x + 0.0) (y + 0.0) (z - ((sqrt 3) / 2.0)) 1, V3 redChannel 0 0),
+    asTriangles = asPoints
 
-        (V4 (x + 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0), -- right
-        (V4 (x + 0.0) (y + 0.0) (z - ((sqrt 3) / 2.0)) 1, V3 redChannel 0 0),
-        (V4 (x + 0.0) (y + ((sqrt 3) / 2.0)) (z - (1.0 / 3.0)) 1, V3 redChannel 0 0),
-
-        (V4 (x - 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0), -- left
-        (V4 (x + 0.0) (y + ((sqrt 3) / 2.0)) (z - (1.0 / 3.0)) 1, V3 redChannel 0 0),
-        (V4 (x + 0.0) (y + 0.0) (z - ((sqrt 3) / 2.0)) 1, V3 redChannel 0 0),
-
-        (V4 (x + 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0), -- front
-        (V4 (x + 0.0) (y + ((sqrt 3) / 2.0)) (z - (1.0 / 3.0)) 1, V3 redChannel 0 0),
-        (V4 (x - 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0)]
-        where
-            greenChannel = fromIntegral playerHitPoints / 100.0
-            redChannel = 1.0 - fromIntegral playerHitPoints / 100.0
-
-    numberOfTriangleVertices x = 12
+    numberOfTriangleVertices = numberOfPointVertices
 
 hit :: Player -> Player
 hit (Player a b c) = Player a (b - 1) c
