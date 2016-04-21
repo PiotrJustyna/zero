@@ -47,51 +47,20 @@ instance Projection Player where
         where
             red = V3 1.0 0.0 0.0
 
-    numberOfPointVertices x = length $ asPoints x
-
-    asLines (Player playerName playerHitPoints (V3 x y z)) =
-        [(V4 (x + 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0), -- bottom
-        (V4 (x - 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0),
-
-        (V4 (x - 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0),
-        (V4 (x + 0.0) (y + 0.0) (z - ((sqrt 3) / 2.0)) 1, V3 redChannel 0 0),
-
-        (V4 (x + 0.0) (y + 0.0) (z - ((sqrt 3) / 2.0)) 1, V3 redChannel 0 0),
-        (V4 (x + 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0),
-
-        (V4 (x + 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0), -- right
-        (V4 (x + 0.0) (y + 0.0) (z - ((sqrt 3) / 2.0)) 1, V3 redChannel 0 0),
-
-        (V4 (x + 0.0) (y + 0.0) (z - ((sqrt 3) / 2.0)) 1, V3 redChannel 0 0),
-        (V4 (x + 0.0) (y + ((sqrt 3) / 2.0)) (z - (1.0 / 3.0)) 1, V3 redChannel 0 0),
-
-        (V4 (x + 0.0) (y + ((sqrt 3) / 2.0)) (z - (1.0 / 3.0)) 1, V3 redChannel 0 0),
-        (V4 (x + 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0),
-
-        (V4 (x - 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0), -- left
-        (V4 (x + 0.0) (y + ((sqrt 3) / 2.0)) (z - (1.0 / 3.0)) 1, V3 redChannel 0 0),
-
-        (V4 (x + 0.0) (y + ((sqrt 3) / 2.0)) (z - (1.0 / 3.0)) 1, V3 redChannel 0 0),
-        (V4 (x + 0.0) (y + 0.0) (z - ((sqrt 3) / 2.0)) 1, V3 redChannel 0 0),
-
-        (V4 (x + 0.0) (y + 0.0) (z - ((sqrt 3) / 2.0)) 1, V3 redChannel 0 0),
-        (V4 (x - 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0),
-
-        (V4 (x + 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0), -- front
-        (V4 (x + 0.0) (y + ((sqrt 3) / 2.0)) (z - (1.0 / 3.0)) 1, V3 redChannel 0 0),
-
-        (V4 (x + 0.0) (y + ((sqrt 3) / 2.0)) (z - (1.0 / 3.0)) 1, V3 redChannel 0 0),
-        (V4 (x - 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0),
-
-        (V4 (x - 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0),
-        (V4 (x + 0.5) (y + 0.0) (z + 0.0) 1, V3 redChannel 0 0)]
+    asLines player = getTriangles $ asPoints player
         where
-            greenChannel = fromIntegral playerHitPoints / 100.0
-            redChannel = 1.0 - fromIntegral playerHitPoints / 100.0
-
-    numberOfLineVertices x = 24
+            getTriangles (vertex1 : vertex2 : vertex3 : allOtherVertices) =
+                [vertex1, vertex2, vertex2, vertex3, vertex3, vertex1] ++
+                getTriangles allOtherVertices
+            getTriangles (vertex1 : vertex2 : allOtherVertices) = []
+            getTriangles (vertex1 : allOtherVertices) = []
+            getTriangles [] = []
 
     asTriangles = asPoints
+
+    numberOfPointVertices x = length $ asPoints x
+
+    numberOfLineVertices player = length $ asLines player
 
     numberOfTriangleVertices = numberOfPointVertices
 
@@ -184,7 +153,7 @@ calculateRawNormalsForPoints [] = []
 
 calculateRawNormalsForLines :: [(V4 Float, V3 Float)] -> [(V4 Float, V3 Float)]
 calculateRawNormalsForLines ((V4 x0X x0Y x0Z x0W, x0C) : x1 : (V4 x2X x2Y x2Z x2W, x2C) : x3 : (V4 x4X x4Y x4Z x4W, x4C) : x5 : xs) =
-    (head normals, white) : (normals !! 1, white) : (normals !! 2, white) : (calculateRawNormalsForPoints xs)
+    (head normals, white) : (head normals, white) : (normals !! 1, white) : (normals !! 1, white) : (normals !! 2, white) : (normals !! 2, white) : (calculateRawNormalsForLines xs)
     where
         normals = calculateNormalsForSurfaceVectors (V3 u1X u1Y u1Z) (V3 u2X u2Y u2Z) (V3 u3X u3Y u3Z) (V3 v1X v1Y v1Z) (V3 v2X v2Y v2Z) (V3 v3X v3Y v3Z)
 
