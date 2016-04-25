@@ -3,8 +3,6 @@ module Player
     PlayerName,
     PlayerHitPoints,
     PlayerLocation,
-    hit,
-    heal,
     zipModelVerticesAndNormalVertices,
     calculateRawNormalsForPoints,
     calculateRawNormalsForLines,
@@ -63,13 +61,6 @@ instance Projection Player where
     numberOfLineVertices player = length $ asLines player
 
     numberOfTriangleVertices = numberOfPointVertices
-
-hit :: Player -> Player
-hit (Player a b c) = Player a (b - 1) c
-
-heal :: Player -> Player
-heal (Player a b c) = Player a (b + 1) c
-
 
 zipModelVerticesAndNormalVertices :: [(V4 Float, V3 Float)]
     -> [(V4 Float, V3 Float)]
