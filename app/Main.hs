@@ -44,12 +44,12 @@ mvpMatrix rX rY rZ tX tY tZ = projectionMatrix !*! viewMatrix !*! modelMatrix rX
 
 main =
     runContextT defaultZeroContextFactory (ContextFormatColor RGB8) $ do
-        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (((numberOfLineVertices (head players)) * 3 * (length players)))
+        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (((length $ asLines (head players)) * 3 * (length players)))
         uniformBuffer :: Buffer os (Uniform (B Float)) <- newBuffer 6
         let representationOfPlayers = (foldl (\acc x -> (asLines x) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
         writeBuffer vertexBuffer 0 representationOfPlayers
         let rawNormals1 = calculateRawNormalsForLines representationOfPlayers
-        writeBuffer vertexBuffer ((numberOfLineVertices (head players)) * (length players)) (zipModelVerticesAndNormalVertices representationOfPlayers rawNormals1)
+        writeBuffer vertexBuffer ((length $ asLines (head players)) * (length players)) (zipModelVerticesAndNormalVertices representationOfPlayers rawNormals1)
         shader :: CompiledShader os (ContextFormat RGBFloat ()) ((PrimitiveArray Lines (B4 Float, B3 Float)), (PrimitiveArray Lines (B4 Float, B3 Float))) <- compileShader $ do
             initialPrimitiveStream :: PrimitiveStream Lines (VertexFormat (B4 Float, B3 Float)) <- toPrimitiveStream (\x -> fst x)
             normalPrimitiveStream :: PrimitiveStream Lines (VertexFormat (B4 Float, B3 Float)) <- toPrimitiveStream (\x -> snd x)
@@ -76,8 +76,8 @@ loop vertexBuffer shader uniformBuffer transformations = do
     render $ do
         clearContextColor (V3 0.2 0.2 0.2)
         vertexArray :: VertexArray () (B4 Float, B3 Float) <- newVertexArray vertexBuffer
-        let primitiveArray :: PrimitiveArray Lines (B4 Float, B3 Float) = toPrimitiveArray LineList (takeVertices ((numberOfLineVertices (head players)) * (length players)) vertexArray)
-        let normalArray :: PrimitiveArray Lines (B4 Float, B3 Float) = toPrimitiveArray LineList (dropVertices ((numberOfLineVertices (head players)) * (length players)) vertexArray)
+        let primitiveArray :: PrimitiveArray Lines (B4 Float, B3 Float) = toPrimitiveArray LineList (takeVertices ((length $ asLines (head players)) * (length players)) vertexArray)
+        let normalArray :: PrimitiveArray Lines (B4 Float, B3 Float) = toPrimitiveArray LineList (dropVertices ((length $ asLines (head players)) * (length players)) vertexArray)
         shader (primitiveArray, normalArray)
     swapContextBuffers
 

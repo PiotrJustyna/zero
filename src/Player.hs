@@ -24,7 +24,7 @@ instance Show Player where
         "\nHit points: " ++ show playerHitPoints ++
         "\nLocation: x=" ++ show x ++ ", y=" ++ show y ++ ", z=" ++ show z
 
-instance Projection Player where
+instance Representation Player where
 
     asPoints player =
         [(V4    0.5     0.0                 0.0                 1, red), -- bottom
@@ -55,12 +55,6 @@ instance Projection Player where
             getTriangles [] = []
 
     asTriangles = asPoints
-
-    numberOfPointVertices x = length $ asPoints x
-
-    numberOfLineVertices player = length $ asLines player
-
-    numberOfTriangleVertices = numberOfPointVertices
 
 zipModelVerticesAndNormalVertices :: [(V4 Float, V3 Float)]
     -> [(V4 Float, V3 Float)]
