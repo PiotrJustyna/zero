@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables, PackageImports, TypeFamilies #-}
 module Main where
 
-import Player
+import Tetrahedron
 import Representation
 import Graphics.GPipe
 import qualified "GPipe-GLFW" Graphics.GPipe.Context.GLFW as GLFW
@@ -11,8 +11,8 @@ import Control.Monad (unless)
 defaultZeroContextFactory :: ContextFactory c ds GLFW.GLFWWindow
 defaultZeroContextFactory = GLFW.newContext' [] (GLFW.WindowConf 800 600 "zero")
 
-players :: [Player]
-players = [Player "a" 0 (V3 0 0 0)]
+objects :: [Tetrahedron]
+objects = [Tetrahedron]
 
 rotationMatrix :: S V Float -> S V Float -> S V Float -> V4 (V4 VFloat)
 rotationMatrix x y z = V4 row1 row2 row3 row4
@@ -44,12 +44,12 @@ mvpMatrix rX rY rZ tX tY tZ = projectionMatrix !*! viewMatrix !*! modelMatrix rX
 
 main =
     runContextT defaultZeroContextFactory (ContextFormatColor RGB8) $ do
-        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (((length $ asLines (head players)) * 3 * (length players)))
+        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (((length $ asLines (head objects)) * 3 * (length objects)))
         uniformBuffer :: Buffer os (Uniform (B Float)) <- newBuffer 6
-        let representationOfPlayers = (foldl (\acc x -> (asLines x) ++ acc) ([] :: [(V4 Float, V3 Float)]) players)
-        writeBuffer vertexBuffer 0 representationOfPlayers
-        let rawNormals1 = calculateRawNormalsForLines representationOfPlayers
-        writeBuffer vertexBuffer ((length $ asLines (head players)) * (length players)) (zipModelVerticesAndNormalVertices representationOfPlayers rawNormals1)
+        let representationOfObjects = (foldl (\acc x -> (asLines x) ++ acc) ([] :: [(V4 Float, V3 Float)]) objects)
+        writeBuffer vertexBuffer 0 representationOfObjects
+        let rawNormals1 = calculateRawNormalsForLines representationOfObjects
+        writeBuffer vertexBuffer ((length $ asLines (head objects)) * (length objects)) (zipModelVerticesAndNormalVertices representationOfObjects rawNormals1)
         shader :: CompiledShader os (ContextFormat RGBFloat ()) ((PrimitiveArray Lines (B4 Float, B3 Float)), (PrimitiveArray Lines (B4 Float, B3 Float))) <- compileShader $ do
             initialPrimitiveStream :: PrimitiveStream Lines (VertexFormat (B4 Float, B3 Float)) <- toPrimitiveStream (\x -> fst x)
             normalPrimitiveStream :: PrimitiveStream Lines (VertexFormat (B4 Float, B3 Float)) <- toPrimitiveStream (\x -> snd x)
@@ -76,8 +76,8 @@ loop vertexBuffer shader uniformBuffer transformations = do
     render $ do
         clearContextColor (V3 0.2 0.2 0.2)
         vertexArray :: VertexArray () (B4 Float, B3 Float) <- newVertexArray vertexBuffer
-        let primitiveArray :: PrimitiveArray Lines (B4 Float, B3 Float) = toPrimitiveArray LineList (takeVertices ((length $ asLines (head players)) * (length players)) vertexArray)
-        let normalArray :: PrimitiveArray Lines (B4 Float, B3 Float) = toPrimitiveArray LineList (dropVertices ((length $ asLines (head players)) * (length players)) vertexArray)
+        let primitiveArray :: PrimitiveArray Lines (B4 Float, B3 Float) = toPrimitiveArray LineList (takeVertices ((length $ asLines (head objects)) * (length objects)) vertexArray)
+        let normalArray :: PrimitiveArray Lines (B4 Float, B3 Float) = toPrimitiveArray LineList (dropVertices ((length $ asLines (head objects)) * (length objects)) vertexArray)
         shader (primitiveArray, normalArray)
     swapContextBuffers
 

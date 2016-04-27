@@ -1,30 +1,16 @@
-module Player
-    (Player(Player),
-    PlayerName,
-    PlayerHitPoints,
-    PlayerLocation,
+module Tetrahedron
+    (Tetrahedron(Tetrahedron),
     zipModelVerticesAndNormalVertices,
     calculateRawNormalsForPoints,
     calculateRawNormalsForLines,
     calculateRawNormalsForTriangles) where
 
 import Representation
-import Data.Word
 import Graphics.GPipe
 
-type PlayerName = String
-type PlayerHitPoints = Word
-type PlayerLocation = V3 Float
+data Tetrahedron = Tetrahedron
 
-data Player = Player PlayerName PlayerHitPoints PlayerLocation
-
-instance Show Player where
-    show (Player playerName playerHitPoints (V3 x y z)) =
-        "Player: " ++ playerName ++
-        "\nHit points: " ++ show playerHitPoints ++
-        "\nLocation: x=" ++ show x ++ ", y=" ++ show y ++ ", z=" ++ show z
-
-instance Representation Player where
+instance Representation Tetrahedron where
 
     asPoints player =
         [(V4    0.5     0.0                 0.0                 1, red), -- bottom

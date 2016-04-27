@@ -15,7 +15,7 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:       src
-  exposed-modules:      Player
+  exposed-modules:      Tetrahedron
                         Representation
   build-depends:        base >= 4.7 && < 5,
                         GPipe
