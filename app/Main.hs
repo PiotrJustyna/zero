@@ -1,6 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables, PackageImports, TypeFamilies #-}
 module Main where
 
+import Camera
 import Tetrahedron
 import Representation
 import Graphics.GPipe
@@ -13,34 +14,6 @@ defaultZeroContextFactory = GLFW.newContext' [] (GLFW.WindowConf 800 600 "zero")
 
 objects :: [Tetrahedron]
 objects = [Tetrahedron]
-
-rotationMatrix :: S V Float -> S V Float -> S V Float -> V4 (V4 VFloat)
-rotationMatrix x y z = V4 row1 row2 row3 row4
-    where
-        row1 = V4 ((cos y) * (cos z))   (((cos z) * (sin x) * (sin y)) - ((cos x) * (sin z)))   (((cos x) * (cos z) * (sin y)) + ((sin x) * (sin z)))   0
-        row2 = V4 ((cos y) * (sin z))   (((cos x) * (cos z)) + ((sin x) * (sin y) * (sin z)))   (((cos x) * (sin y) * (sin z)) - ((cos z) * (sin x)))   0
-        row3 = V4 ((-1.0) * (sin y))    ((cos y) * (sin x))                                     ((cos x) * (cos y))                                     0
-        row4 = V4 0                     0                                                       0                                                       1
-
-translationMatrix :: S V Float -> S V Float -> S V Float -> V4 (V4 VFloat)
-translationMatrix x y z = V4 row1 row2 row3 row4
-    where
-        row1 = V4 1 0 0 x
-        row2 = V4 0 1 0 y
-        row3 = V4 0 0 1 z
-        row4 = V4 0 0 0 1
-
-modelMatrix :: S V Float -> S V Float -> S V Float -> S V Float -> S V Float -> S V Float -> V4 (V4 VFloat)
-modelMatrix rX rY rZ tX tY tZ = (translationMatrix tX tY tZ) !*! (rotationMatrix rX rY rZ)
-
-viewMatrix :: V4 (V4 VFloat)
-viewMatrix = translationMatrix 0.0 0.0 (-3.0)
-
-projectionMatrix :: V4 (V4 VFloat)
-projectionMatrix = perspective (pi / 4.0) 1.0 0.1 10.0
-
-mvpMatrix :: S V Float -> S V Float -> S V Float -> S V Float -> S V Float -> S V Float -> V4 (V4 VFloat)
-mvpMatrix rX rY rZ tX tY tZ = projectionMatrix !*! viewMatrix !*! modelMatrix rX rY rZ tX tY tZ
 
 lightPosition :: V4 VFloat
 lightPosition = V4 0.0 2.0 0.0 0.0

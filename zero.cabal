@@ -1,5 +1,5 @@
 name:                zero
-version:             0.1.1.17
+version:             0.1.1.18
 synopsis:            A silly little realtime rendering project.
 description:         Please see README.md
 homepage:            http://github.com/piotrjustyna/zero#readme
@@ -15,7 +15,8 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:       src
-  exposed-modules:      Tetrahedron
+  exposed-modules:      Camera,
+                        Tetrahedron
                         Representation
   build-depends:        base >= 4.7 && < 5,
                         GPipe
