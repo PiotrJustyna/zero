@@ -1,67 +1,53 @@
 module Tetrahedron
     (Tetrahedron(Tetrahedron),
-    zipModelVerticesAndNormalVertices,
-    calculateRawNormalsForPoints,
-    calculateRawNormalsForLines,
-    calculateRawNormalsForTriangles) where
+    trianglesVerticesNormalsAndColours) where
 
-import Representation
 import Graphics.GPipe
 
 data Tetrahedron = Tetrahedron
 
-instance Representation Tetrahedron where
+points :: [V4 Float]
+points =
+    [V4    0.5     0.0                 0.0                 1, -- bottom
+    V4     (-0.5)  0.0                 0.0                 1,
+    V4     0.0     0.0                 ((sqrt 3) / (-2.0)) 1,
 
-    asPoints player =
-        [(V4    0.5     0.0                 0.0                 1, red), -- bottom
-        (V4     (-0.5)  0.0                 0.0                 1, red),
-        (V4     0.0     0.0                 ((sqrt 3) / (-2.0)) 1, red),
+    V4     0.5     0.0                 0.0                 1, -- right
+    V4     0.0     0.0                 ((sqrt 3) / (-2.0)) 1,
+    V4     0.0     ((sqrt 3) / 2.0)    (1.0 / (-3.0))      1,
 
-        (V4     0.5     0.0                 0.0                 1, red), -- right
-        (V4     0.0     0.0                 ((sqrt 3) / (-2.0)) 1, red),
-        (V4     0.0     ((sqrt 3) / 2.0)    (1.0 / (-3.0))      1, red),
+    V4     (-0.5)  0.0                 0.0                 1, -- left
+    V4     0.0     ((sqrt 3) / 2.0)    (1.0 / (-3.0))      1,
+    V4     0.0     0.0                 ((sqrt 3) / (-2.0)) 1,
 
-        (V4     (-0.5)  0.0                 0.0                 1, red), -- left
-        (V4     0.0     ((sqrt 3) / 2.0)    (1.0 / (-3.0))      1, red),
-        (V4     0.0     0.0                 ((sqrt 3) / (-2.0)) 1, red),
+    V4     0.5     0.0                 0.0                 1, -- front
+    V4     0.0     ((sqrt 3) / 2.0)    (1.0 / (-3.0))      1,
+    V4     (-0.5)  0.0                 0.0                 1]
 
-        (V4     0.5     0.0                 0.0                 1, red), -- front
-        (V4     0.0     ((sqrt 3) / 2.0)    (1.0 / (-3.0))      1, red),
-        (V4     (-0.5)  0.0                 0.0                 1, red)]
-        where
-            red = V3 1.0 0.0 0.0
-
-    asLines player = getTriangles $ asPoints player
-        where
-            getTriangles (vertex1 : vertex2 : vertex3 : allOtherVertices) =
-                [vertex1, vertex2, vertex2, vertex3, vertex3, vertex1] ++
-                getTriangles allOtherVertices
-            getTriangles (vertex1 : vertex2 : allOtherVertices) = []
-            getTriangles (vertex1 : allOtherVertices) = []
-            getTriangles [] = []
-
-    asTriangles = asPoints
-
-zipModelVerticesAndNormalVertices :: [(V4 Float, V3 Float)]
-    -> [(V4 Float, V3 Float)]
-    -> [(V4 Float, V3 Float)]
-zipModelVerticesAndNormalVertices a b =
-    foldl
-        (\acc (x, y) -> (x : (y : acc)))
-        [] $
-        zipWith
-            (\(V4 mVX mVY mVZ mVW, mC) (V4 nVX nVY nVZ nVW, nC) ->
-                ((V4 mVX mVY mVZ 1.0, nC), (V4 (mVX + nVX) (mVY + nVY) (mVZ + nVZ) 1.0, nC)))
-            a
-            b
-
-calculateRawNormalsForPoints :: [(V4 Float, V3 Float)] -> [(V4 Float, V3 Float)]
-calculateRawNormalsForPoints ((V4 x0X x0Y x0Z x0W, x0C) : (V4 x1X x1Y x1Z x1W, x1C) : (V4 x2X x2Y x2Z x2W, x2C) : xs) =
-    normal1 : normal2 : normal3 : (calculateRawNormalsForPoints xs)
+lines :: [V4 Float]
+lines = getTriangles points
     where
-        normal1 = (V4 (n1X / 10.0) (n1Y / 10.0) (n1Z / 10.0) 1.0, white)
-        normal2 = (V4 (n2X / 10.0) (n2Y / 10.0) (n2Z / 10.0) 1.0, white)
-        normal3 = (V4 (n3X / 10.0) (n3Y / 10.0) (n3Z / 10.0) 1.0, white)
+        getTriangles (vertex1 : vertex2 : vertex3 : allOtherVertices) =
+            [vertex1, vertex2, vertex2, vertex3, vertex3, vertex1] ++
+            getTriangles allOtherVertices
+        getTriangles (vertex1 : vertex2 : allOtherVertices) = []
+        getTriangles (vertex1 : allOtherVertices) = []
+        getTriangles [] = []
+
+
+triangles :: [V4 Float]
+triangles = points
+
+trianglesVerticesNormalsAndColours :: [(V4 Float, V4 Float, V3 Float)]
+trianglesVerticesNormalsAndColours = map (\x -> (x, V4 0.0 1.0 0.0 1.0, V3 1.0 0.0 0.0)) triangles
+
+calculateNormalVectorsForPoints :: [V4 Float] -> [V4 Float]
+calculateNormalVectorsForPoints ((V4 x0X x0Y x0Z x0W) : (V4 x1X x1Y x1Z x1W) : (V4 x2X x2Y x2Z x2W) : xs) =
+    normal1 : normal2 : normal3 : (calculateNormalVectorsForPoints xs)
+    where
+        normal1 = V4 (n1X / 10.0) (n1Y / 10.0) (n1Z / 10.0) 1.0
+        normal2 = V4 (n2X / 10.0) (n2Y / 10.0) (n2Z / 10.0) 1.0
+        normal3 = V4 (n3X / 10.0) (n3Y / 10.0) (n3Z / 10.0) 1.0
 
         n1X = (u1Y * v1Z) - (u1Z * v1Y)
         n1Y = (u1Z * v1X) - (u1X * v1Z)
@@ -104,16 +90,14 @@ calculateRawNormalsForPoints ((V4 x0X x0Y x0Z x0W, x0C) : (V4 x1X x1Y x1Z x1W, x
         v3X = x1X - x2X
         v3Y = x1Y - x2Y
         v3Z = x1Z - x2Z
+calculateNormalVectorsForPoints (x0 : x1 : xs) = []
+calculateNormalVectorsForPoints (x0 : xs) = []
+calculateNormalVectorsForPoints [] = []
 
-        white = V3 1.0 1.0 1.0
-calculateRawNormalsForPoints (x0 : x1 : xs) = []
-calculateRawNormalsForPoints (x0 : xs) = []
-calculateRawNormalsForPoints [] = []
-
-calculateRawNormalsForLines :: [(V4 Float, V3 Float)] -> [(V4 Float, V3 Float)]
-calculateRawNormalsForLines vertices = duplicateVertices $ calculateRawNormalsForPoints $ skimVertices vertices
+calculateNormalVectorsForLines :: [V4 Float] -> [V4 Float]
+calculateNormalVectorsForLines vertices = duplicateVertices $ calculateNormalVectorsForPoints $ skimVertices vertices
     where
-        duplicateVertices (x : xs) = x : x : duplicateVertices xs 
+        duplicateVertices (x : xs) = x : x : duplicateVertices xs
         duplicateVertices [] = []
         skimVertices (x0 : x1 : x2 : x3 : x4 : x5 : xs) = x0 : x2 : x4 : skimVertices xs
         skimVertices (x0 : x1 : x2 : x3 : x4 : xs) = []
@@ -123,5 +107,5 @@ calculateRawNormalsForLines vertices = duplicateVertices $ calculateRawNormalsFo
         skimVertices (x0 : xs) = []
         skimVertices [] = []
 
-calculateRawNormalsForTriangles :: [(V4 Float, V3 Float)] -> [(V4 Float, V3 Float)]
-calculateRawNormalsForTriangles = calculateRawNormalsForPoints
+calculateNormalVectorsForTriangles :: [V4 Float] -> [V4 Float]
+calculateNormalVectorsForTriangles = calculateNormalVectorsForPoints
