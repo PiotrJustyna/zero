@@ -6,7 +6,6 @@ import Tetrahedron
 import Representation
 import Graphics.GPipe
 import qualified "GPipe-GLFW" Graphics.GPipe.Context.GLFW as GLFW
-import Control.Arrow (first)
 import Control.Monad (unless)
 
 defaultZeroContextFactory :: ContextFactory c ds GLFW.GLFWWindow
@@ -18,32 +17,32 @@ objects = [Tetrahedron]
 lightPosition :: V4 VFloat
 lightPosition = V4 0.0 2.0 0.0 0.0
 
+-- diffuse = Kd x lightColor x max(N · L, 0)
+-- source: http://http.developer.nvidia.com/CgTutorial/cg_tutorial_chapter05.html
+
 main =
     runContextT defaultZeroContextFactory (ContextFormatColor RGB8) $ do
-        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (((length $ asLines (head objects)) * 3 * (length objects)))
+        vertexBuffer :: Buffer os (B4 Float, B3 Float) <- newBuffer (((length $ asTriangles (head objects)) * (length objects)))
         uniformBuffer :: Buffer os (Uniform (B Float)) <- newBuffer 6
-        let representationOfObjects = (foldl (\acc x -> (asLines x) ++ acc) ([] :: [(V4 Float, V3 Float)]) objects)
+        let representationOfObjects = (foldl (\acc x -> (asTriangles x) ++ acc) ([] :: [(V4 Float, V3 Float)]) objects)
         writeBuffer vertexBuffer 0 representationOfObjects
-        let rawNormals1 = calculateRawNormalsForLines representationOfObjects
-        writeBuffer vertexBuffer ((length $ asLines (head objects)) * (length objects)) (zipModelVerticesAndNormalVertices representationOfObjects rawNormals1)
-        shader :: CompiledShader os (ContextFormat RGBFloat ()) ((PrimitiveArray Lines (B4 Float, B3 Float)), (PrimitiveArray Lines (B4 Float, B3 Float))) <- compileShader $ do
-            initialPrimitiveStream :: PrimitiveStream Lines (VertexFormat (B4 Float, B3 Float)) <- toPrimitiveStream (\x -> fst x)
-            normalPrimitiveStream :: PrimitiveStream Lines (VertexFormat (B4 Float, B3 Float)) <- toPrimitiveStream (\x -> snd x)
+        shader :: CompiledShader os (ContextFormat RGBFloat ()) ((PrimitiveArray Triangles (B4 Float, B3 Float))) <- compileShader $ do
+            initialPrimitiveStream :: PrimitiveStream Triangles (VertexFormat (B4 Float, B3 Float)) <- toPrimitiveStream id
             rX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 0))
             rY :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 1))
             rZ :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 2))
             tX :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 3))
             tY :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 4))
             tZ :: UniformFormat (B Float) V <- getUniform (const (uniformBuffer, 5))
-            let transformedPrimitiveStream :: PrimitiveStream Lines (VertexFormat(B4 Float, B3 Float)) = (\(vertex, colour) -> (mvpMatrix rX rY rZ tX tY tZ !* vertex, colour / 2)) <$> initialPrimitiveStream
-            let transformedNormalPrimitiveStream :: PrimitiveStream Lines (VertexFormat(B4 Float, B3 Float)) = (first (mvpMatrix rX rY rZ tX tY tZ !*)) <$> normalPrimitiveStream
-            let combinedPrimitiveStreams = transformedPrimitiveStream `mappend` transformedNormalPrimitiveStream
-            fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) combinedPrimitiveStreams
+            let transformedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat(B4 Float, B3 Float)) = (\(vertex, colour) -> (mvpMatrix rX rY rZ tX tY tZ !* vertex, colour)) <$> initialPrimitiveStream
+            -- I initially wanted to try something like this out, but unfortunately B4 and B3 types do not expose constructors.
+            -- let transformedPrimitiveStream :: PrimitiveStream Lines (VertexFormat(B4 Float, B3 Float)) = (\(vertex, colour) -> (mvpMatrix rX rY rZ tX tY tZ !* vertex, colour * (max 0 ((B4 0.0 1.0 0.0 1.0 :: B4 Float) `dot` ((B4 0.0 1.0 0.0 2.0 :: B4 Float) - vertex))))) <$> initialPrimitiveStream
+            fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) transformedPrimitiveStream
             drawContextColor (const (ContextColorOption NoBlending (V3 True True True))) fragmentStream
         loop vertexBuffer shader uniformBuffer [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 loop :: Buffer os (B4 Float, B3 Float)
-    -> CompiledShader os (ContextFormat RGBFloat ()) ((PrimitiveArray Lines (B4 Float, B3 Float)), (PrimitiveArray Lines (B4 Float, B3 Float)))
+    -> CompiledShader os (ContextFormat RGBFloat ()) ((PrimitiveArray Triangles (B4 Float, B3 Float)))
     -> Buffer os (Uniform (B Float))
     -> [Float]
     -> ContextT GLFW.GLFWWindow os (ContextFormat RGBFloat ()) IO ()
@@ -52,9 +51,8 @@ loop vertexBuffer shader uniformBuffer transformations = do
     render $ do
         clearContextColor (V3 0.2 0.2 0.2)
         vertexArray :: VertexArray () (B4 Float, B3 Float) <- newVertexArray vertexBuffer
-        let primitiveArray :: PrimitiveArray Lines (B4 Float, B3 Float) = toPrimitiveArray LineList (takeVertices ((length $ asLines (head objects)) * (length objects)) vertexArray)
-        let normalArray :: PrimitiveArray Lines (B4 Float, B3 Float) = toPrimitiveArray LineList (dropVertices ((length $ asLines (head objects)) * (length objects)) vertexArray)
-        shader (primitiveArray, normalArray)
+        let primitiveArray :: PrimitiveArray Triangles (B4 Float, B3 Float) = toPrimitiveArray TriangleList (takeVertices ((length $ asTriangles (head objects)) * (length objects)) vertexArray)
+        shader primitiveArray
     swapContextBuffers
 
     rotateXKeyState :: GLFW.KeyState <- GLFW.getKey GLFW.Key'Q
