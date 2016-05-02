@@ -3,6 +3,7 @@ engines:
         enabled: true
         exclude_fingerprints:
             - dbf6753d189791f6975c202d0500e683
+            - 386ef4315a19496b1cc403db8dcb926c
 ratings:
     paths:
     - "**.hs"
