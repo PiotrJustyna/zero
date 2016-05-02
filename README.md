@@ -18,6 +18,7 @@ in a sort-of-real-life project. I have always enjoyed playing with real-time ren
 
 ## Linux
 
+![diffuse light](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/26.png)
 ![lines and normals - cube](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/17.png)
 ![lines and normals - tetrahedron](https://raw.githubusercontent.com/PiotrJustyna/zero/master/images/18.png)
 
