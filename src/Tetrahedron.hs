@@ -39,15 +39,25 @@ triangles :: [V4 Float]
 triangles = points
 
 trianglesVerticesNormalsAndColours :: [(V4 Float, V4 Float, V3 Float)]
-trianglesVerticesNormalsAndColours = map (\x -> (x, V4 0.0 1.0 0.0 1.0, V3 1.0 0.0 0.0)) triangles
+trianglesVerticesNormalsAndColours = zip3 triangles (calculateNormalVectorsForTriangles triangles) reds
+
+reds :: [V3 Float]
+reds = replicate (length triangles) (V3 1.0 0.0 0.0)
+
+calculateNormalVectorsForTriangles1 :: [V4 Float] -> [V4 Float]
+calculateNormalVectorsForTriangles1 a = replicate (length triangles) (V4 1.0 1.0 0.0 1.0)
 
 calculateNormalVectorsForPoints :: [V4 Float] -> [V4 Float]
 calculateNormalVectorsForPoints ((V4 x0X x0Y x0Z x0W) : (V4 x1X x1Y x1Z x1W) : (V4 x2X x2Y x2Z x2W) : xs) =
     normal1 : normal2 : normal3 : (calculateNormalVectorsForPoints xs)
     where
-        normal1 = V4 (n1X / 10.0) (n1Y / 10.0) (n1Z / 10.0) 1.0
-        normal2 = V4 (n2X / 10.0) (n2Y / 10.0) (n2Z / 10.0) 1.0
-        normal3 = V4 (n3X / 10.0) (n3Y / 10.0) (n3Z / 10.0) 1.0
+--        normal1 = V4 1.0 0.5 0.0 1.0
+--        normal2 = V4 1.0 0.5 0.0 1.0
+--        normal3 = V4 1.0 0.5 0.0 1.0
+
+        normal1 = V4 n1X n1Y n1Z 1.0
+        normal2 = V4 n2X n2Y n2Z 1.0
+        normal3 = V4 n3X n3Y n3Z 1.0
 
         n1X = (u1Y * v1Z) - (u1Z * v1Y)
         n1Y = (u1Z * v1X) - (u1X * v1Z)
