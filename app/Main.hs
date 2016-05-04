@@ -14,7 +14,7 @@ object :: [Tetrahedron]
 object = [Tetrahedron]
 
 light :: V4 VFloat
-light = V4 2.0 2.0 0.0 1.0
+light = V4 0.0 0.0 0.0 1.0
 
 -- diffuse = Kd x lightColor x max(N · L, 0)
 -- source: http://http.developer.nvidia.com/CgTutorial/cg_tutorial_chapter05.html
@@ -33,7 +33,7 @@ main =
             tY :: UniformFormat (B Float) V <- getUniform (const (transformationUniformBuffer, 4))
             tZ :: UniformFormat (B Float) V <- getUniform (const (transformationUniformBuffer, 5))
 --          colour * (max 0 ((B4 0.0 1.0 0.0 1.0 :: B4 Float) `dot` ((B4 0.0 1.0 0.0 2.0 :: B4 Float) - vertex)))))
-            let transformedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat (B4 Float, B3 Float)) = (\(vertex, normal, colour) -> (mvpMatrix rX rY rZ tX tY tZ !* vertex, gpuMul colour ((modelMatrix rX rY rZ tX tY tZ !* normal) `dot` (((projectionMatrix !*! viewMatrix) !* light) - (modelMatrix rX rY rZ tX tY tZ !* vertex))))) <$> initialPrimitiveStream
+            let transformedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat (B4 Float, B3 Float)) = (\(vertex, normal, colour) -> (mvpMatrix rX rY rZ tX tY tZ !* vertex, gpuMul colour (((viewMatrix !*! modelMatrix rX rY rZ tX tY tZ) !* normal) `dot` ((viewMatrix !* light) - ((viewMatrix !*! modelMatrix rX rY rZ tX tY tZ) !* vertex))))) <$> initialPrimitiveStream
             fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) transformedPrimitiveStream
             drawContextColor (const (ContextColorOption NoBlending (V3 True True True))) fragmentStream
         loop vertexBuffer shader transformationUniformBuffer [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
