@@ -13,8 +13,11 @@ defaultZeroContextFactory = GLFW.newContext' [] (GLFW.WindowConf 800 600 "zero")
 object :: [Tetrahedron]
 object = [Tetrahedron]
 
-light :: V4 VFloat
-light = V4 0.0 0.0 0.0 1.0
+lightPosition :: V4 VFloat
+lightPosition = V4 2.0 2.0 0.0 1.0
+
+lightColour :: V3 VFloat
+lightColour = V3 0.3 0.3 0.3
 
 -- diffuse = Kd x lightColor x max(N · L, 0)
 -- source: http://http.developer.nvidia.com/CgTutorial/cg_tutorial_chapter05.html
@@ -32,10 +35,24 @@ main =
             tX :: UniformFormat (B Float) V <- getUniform (const (transformationUniformBuffer, 3))
             tY :: UniformFormat (B Float) V <- getUniform (const (transformationUniformBuffer, 4))
             tZ :: UniformFormat (B Float) V <- getUniform (const (transformationUniformBuffer, 5))
-            let transformedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat (B4 Float, B3 Float)) = (\(vertex, normal, colour) -> (mvpMatrix rX rY rZ tX tY tZ !* vertex, gpuMul colour (takeMax 0 (((viewMatrix !*! modelMatrix rX rY rZ tX tY tZ) !* normal) `dot` ((viewMatrix !* light) - ((viewMatrix !*! modelMatrix rX rY rZ tX tY tZ) !* vertex)))))) <$> initialPrimitiveStream
+            let transformedPrimitiveStream :: PrimitiveStream Triangles (VertexFormat (B4 Float, B3 Float)) = (\(vertex, normal, colour) -> (mvpMatrix rX rY rZ tX tY tZ !* vertex, gpuMul (colour * lightColour) (takeMax 0 ((nVector rX rY rZ tX tY tZ normal) `dot` (lVector rX rY rZ tX tY tZ vertex))))) <$> initialPrimitiveStream
             fragmentStream :: FragmentStream (V3 (FragmentFormat (S V Float))) <- rasterize (const (Front, ViewPort (V2 0 0) (V2 800 600), DepthRange 0 1)) transformedPrimitiveStream
             drawContextColor (const (ContextColorOption NoBlending (V3 True True True))) fragmentStream
         loop vertexBuffer shader transformationUniformBuffer [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+nVector :: VFloat -> VFloat -> VFloat -> VFloat -> VFloat -> VFloat -> V4 VFloat -> V4 VFloat
+nVector rX rY rZ tX tY tZ normal = zeroNormalize $ (mvMatrix rX rY rZ tX tY tZ) !* normal
+
+lVector :: VFloat -> VFloat -> VFloat -> VFloat -> VFloat -> VFloat -> V4 VFloat -> V4 VFloat
+lVector rX rY rZ tX tY tZ vertex = zeroNormalize $ (viewMatrix !* lightPosition) - ((mvMatrix rX rY rZ tX tY tZ) !* vertex)
+
+zeroNormalize :: V4 VFloat -> V4 VFloat
+zeroNormalize (V4 x y z w) = (V4 x' y' z' 1.0)
+    where
+        x' = x / norm
+        y' = y / norm
+        z' = z / norm
+        norm = sqrt $ (x ** 2.0) + (y ** 2.0) + (z ** 2.0)
 
 gpuMul :: (V3 VFloat) -> VFloat -> (V3 VFloat)
 gpuMul (V3 a b c) d = V3 (a * d) (b * d) (c * d)
